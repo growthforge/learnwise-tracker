@@ -9,12 +9,10 @@ import NotFound from "./pages/NotFound";
 import Tasks from "./pages/Tasks";
 import Courses from "./pages/Courses";
 import Analytics from "./pages/Analytics";
-import Layout from "./components/Layout";
-
-// Let's create two missing page components for Schedule and Sessions
 import Schedule from "./pages/Schedule";
 import Sessions from "./pages/Sessions";
 import Settings from "./pages/Settings";
+import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
 
@@ -32,7 +30,6 @@ const App = () => (
           <Route path="/schedule" element={<Layout><Schedule /></Layout>} />
           <Route path="/analytics" element={<Layout><Analytics /></Layout>} />
           <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

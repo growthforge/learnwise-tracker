@@ -37,7 +37,8 @@
 
     --radius: 0.75rem;
 
-    --sidebar-background: 223 60% 16%;
+    /* Updated sidebar colors to match the image */
+    --sidebar-background: 222 47% 10%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 262 83% 58%;
     --sidebar-primary-foreground: 210 40% 98%;
