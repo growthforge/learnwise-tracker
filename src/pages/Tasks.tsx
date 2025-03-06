@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, Calendar, CheckSquare, Clock } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -138,7 +136,7 @@ const Tasks: React.FC = () => {
   const completedTasks = tasks.filter(task => task.completed);
   
   return (
-    <Layout>
+    <>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Tasks & Assignments</h1>
@@ -243,7 +241,7 @@ const Tasks: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

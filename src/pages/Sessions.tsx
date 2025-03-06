@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
@@ -77,7 +75,7 @@ const Sessions: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Study Sessions</h1>
@@ -224,7 +222,7 @@ const Sessions: React.FC = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

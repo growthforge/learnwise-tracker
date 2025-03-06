@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import Layout from "@/components/Layout";
 import CourseCard, { Course } from "@/components/CourseCard";
 import TaskList, { Task } from "@/components/TaskList";
 import StudySession from "@/components/StudySession";
@@ -153,7 +151,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Layout>
+    <>
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Hello, Student</h1>
         <p className="text-muted-foreground">Here's an overview of your study progress</p>
@@ -266,7 +264,7 @@ const Dashboard: React.FC = () => {
         <h2 className="text-xl font-bold mb-6">Study Analytics</h2>
         <StatsOverview stats={sampleStats} />
       </div>
-    </Layout>
+    </>
   );
 };
 

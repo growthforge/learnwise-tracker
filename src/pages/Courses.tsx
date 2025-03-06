@@ -1,10 +1,7 @@
-
 import React from "react";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, BookOpen } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { 
   Select, 
   SelectContent, 
@@ -92,7 +89,7 @@ const sampleCourses: Course[] = [
 
 const Courses: React.FC = () => {
   return (
-    <Layout>
+    <>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Your Courses</h1>
@@ -151,7 +148,7 @@ const Courses: React.FC = () => {
           </Button>
         </div>
       </div>
-    </Layout>
+    </>
   );
 };
 

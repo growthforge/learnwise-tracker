@@ -1,6 +1,4 @@
-
 import React, { useState } from "react";
-import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   ArrowUpRight, 
@@ -82,7 +80,7 @@ const Analytics: React.FC = () => {
   const averageHoursPerDay = totalStudyHours / data.length;
 
   return (
-    <Layout>
+    <>
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Study Analytics</h1>
@@ -355,7 +353,7 @@ const Analytics: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-    </Layout>
+    </>
   );
 };
 
