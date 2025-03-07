@@ -1,6 +1,7 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, Calendar, CheckSquare, Clock } from "lucide-react";
+import { Plus, Search, Filter, Calendar, CheckSquare, Clock, Trash, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
   Select, 
@@ -11,14 +12,35 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TaskList, { Task } from "@/components/TaskList";
+import TaskForm from "@/components/TaskForm";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
 // Sample data
+const sampleCourses = [
+  { id: "course-1", name: "Machine Learning", code: "CS-433", color: "blue" },
+  { id: "course-2", name: "Data Structures", code: "CS-201", color: "green" },
+  { id: "course-3", name: "Linear Algebra", code: "MATH-304", color: "purple" },
+  { id: "course-4", name: "Economics 101", code: "ECON-101", color: "amber" },
+  { id: "course-5", name: "Introduction to Psychology", code: "PSYC-101", color: "red" },
+  { id: "course-6", name: "Algorithms", code: "CS-301", color: "sky" },
+];
+
 const sampleTasks: Task[] = [
   {
     id: "task-1",
     title: "Complete ML Assignment 3",
     course: {
+      id: "course-1",
       name: "Machine Learning",
       code: "CS-433",
       color: "blue",
@@ -110,6 +132,11 @@ const sampleTasks: Task[] = [
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(sampleTasks);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [courseFilter, setCourseFilter] = useState("all");
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | undefined>(undefined);
+  const [taskToDelete, setTaskToDelete] = useState<Task | undefined>(undefined);
   
   const handleTaskToggle = (taskToToggle: Task) => {
     setTasks(
@@ -126,14 +153,53 @@ const Tasks: React.FC = () => {
   };
   
   const handleTaskClick = (task: Task) => {
-    // In a real app, this would open a task detail view or editor
-    toast.info("Task details", {
-      description: `View details for: ${task.title}`,
+    // Show task details
+    toast.info(task.title, {
+      description: task.description || "No additional details available",
     });
   };
   
-  const pendingTasks = tasks.filter(task => !task.completed);
-  const completedTasks = tasks.filter(task => task.completed);
+  const handleAddEditTask = (task: Task) => {
+    if (taskToEdit) {
+      // Update existing task
+      setTasks(tasks.map(t => t.id === task.id ? task : t));
+      toast.success("Task updated successfully");
+    } else {
+      // Add new task
+      setTasks([task, ...tasks]);
+      toast.success("Task added successfully");
+    }
+    setTaskToEdit(undefined);
+  };
+  
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(tasks.filter(task => task.id !== taskId));
+    toast.success("Task deleted successfully");
+    setTaskToDelete(undefined);
+  };
+  
+  const openEditForm = (task: Task) => {
+    setTaskToEdit(task);
+    setIsFormOpen(true);
+  };
+  
+  const filteredTasks = tasks
+    .filter(task => {
+      // Apply search term filter
+      if (searchTerm && !task.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // Apply course filter
+      if (courseFilter !== "all" && task.course.id !== courseFilter) {
+        return false;
+      }
+      
+      return true;
+    });
+  
+  const pendingTasks = filteredTasks.filter(task => !task.completed);
+  const completedTasks = filteredTasks.filter(task => task.completed);
   
   return (
     <>
@@ -142,7 +208,10 @@ const Tasks: React.FC = () => {
           <h1 className="text-3xl font-bold mb-2">Tasks & Assignments</h1>
           <p className="text-muted-foreground">Manage your tasks and assignments for all courses</p>
         </div>
-        <Button>
+        <Button onClick={() => {
+          setTaskToEdit(undefined);
+          setIsFormOpen(true);
+        }}>
           <Plus className="w-4 h-4 mr-2" />
           Add Task
         </Button>
@@ -154,20 +223,24 @@ const Tasks: React.FC = () => {
           <Input 
             placeholder="Search tasks..." 
             className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex gap-3">
           <div className="w-48">
-            <Select defaultValue="all">
+            <Select 
+              value={courseFilter} 
+              onValueChange={setCourseFilter}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Filter by course" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Courses</SelectItem>
-                <SelectItem value="cs433">Machine Learning</SelectItem>
-                <SelectItem value="cs201">Data Structures</SelectItem>
-                <SelectItem value="math304">Linear Algebra</SelectItem>
-                <SelectItem value="econ101">Economics 101</SelectItem>
+                {sampleCourses.map(course => (
+                  <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -201,6 +274,8 @@ const Tasks: React.FC = () => {
             emptyMessage="No pending tasks"
             onTaskToggle={handleTaskToggle}
             onTaskClick={handleTaskClick}
+            onTaskEdit={openEditForm}
+            onTaskDelete={setTaskToDelete}
           />
         </TabsContent>
         
@@ -211,16 +286,20 @@ const Tasks: React.FC = () => {
             emptyMessage="No completed tasks"
             onTaskToggle={handleTaskToggle}
             onTaskClick={handleTaskClick}
+            onTaskEdit={openEditForm}
+            onTaskDelete={setTaskToDelete}
           />
         </TabsContent>
         
         <TabsContent value="all" className="mt-6">
           <TaskList
-            tasks={tasks}
+            tasks={filteredTasks}
             title="All Tasks"
             emptyMessage="No tasks available"
             onTaskToggle={handleTaskToggle}
             onTaskClick={handleTaskClick}
+            onTaskEdit={openEditForm}
+            onTaskDelete={setTaskToDelete}
           />
         </TabsContent>
       </Tabs>
@@ -241,6 +320,44 @@ const Tasks: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Task Form Modal */}
+      {isFormOpen && (
+        <TaskForm
+          isOpen={isFormOpen}
+          onClose={() => {
+            setIsFormOpen(false);
+            setTaskToEdit(undefined);
+          }}
+          onSave={handleAddEditTask}
+          initialTask={taskToEdit}
+          courses={sampleCourses}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog 
+        open={!!taskToDelete} 
+        onOpenChange={(open) => !open && setTaskToDelete(undefined)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the task "{taskToDelete?.title}" and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => handleDeleteTask(taskToDelete?.id || '')}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

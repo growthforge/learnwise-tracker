@@ -1,12 +1,14 @@
 
 import React from "react";
-import { CheckCircle2, Circle, Clock, CalendarClock, ArrowUpRight } from "lucide-react";
+import { CheckCircle2, Circle, Clock, CalendarClock, ArrowUpRight, Pencil, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export interface Task {
   id: string;
   title: string;
   course: {
+    id: string;
     name: string;
     code: string;
     color: string;
@@ -15,6 +17,7 @@ export interface Task {
   completed: boolean;
   priority: "high" | "medium" | "low";
   estimatedTime?: number;
+  description?: string;
 }
 
 interface TaskListProps {
@@ -24,6 +27,8 @@ interface TaskListProps {
   showViewAll?: boolean;
   onTaskClick?: (task: Task) => void;
   onTaskToggle?: (task: Task) => void;
+  onTaskEdit?: (task: Task) => void;
+  onTaskDelete?: (task: Task) => void;
   className?: string;
 }
 
@@ -40,6 +45,8 @@ const TaskList: React.FC<TaskListProps> = ({
   showViewAll = false,
   onTaskClick,
   onTaskToggle,
+  onTaskEdit,
+  onTaskDelete,
   className,
 }) => {
   return (
@@ -63,7 +70,7 @@ const TaskList: React.FC<TaskListProps> = ({
               className={cn(
                 "p-3 rounded-lg border subtle-border transition-all",
                 task.completed ? "bg-muted/50" : "bg-card",
-                onTaskClick && "cursor-pointer hover:border-primary/40"
+                onTaskClick && "hover:border-primary/40"
               )}
               onClick={() => onTaskClick && onTaskClick(task)}
             >
@@ -107,6 +114,38 @@ const TaskList: React.FC<TaskListProps> = ({
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Task action buttons */}
+                  {(onTaskEdit || onTaskDelete) && (
+                    <div className="flex justify-end gap-2 mt-2">
+                      {onTaskEdit && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onTaskEdit(task);
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                      {onTaskDelete && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onTaskDelete(task);
+                          }}
+                        >
+                          <Trash className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

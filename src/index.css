@@ -97,6 +97,7 @@
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   ::-webkit-scrollbar {
@@ -150,4 +151,42 @@
   body {
     @apply overflow-x-hidden;
   }
+  
+  /* Make inputs and buttons more touch-friendly on mobile */
+  button, 
+  .btn, 
+  input, 
+  select {
+    @apply min-h-10;
+  }
+  
+  /* Enhance tap targets on mobile */
+  .clickable, 
+  button, 
+  a {
+    @apply cursor-pointer;
+  }
+}
+
+/* Use viewport units for full-height layouts */
+.min-h-screen {
+  min-height: 100vh;
+  /* For mobile browsers with dynamic address bars */
+  min-height: -webkit-fill-available;
+}
+
+/* Fixed sidebar styles */
+.sidebar-fixed {
+  height: 100vh;
+  height: -webkit-fill-available;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+}
+
+/* Safari height fix */
+html {
+  height: -webkit-fill-available;
 }

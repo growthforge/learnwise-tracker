@@ -89,7 +89,7 @@ const StudySession: React.FC<StudySessionProps> = ({
   
   return (
     <Card className={cn("overflow-hidden", className)}>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center space-x-2">
           <Clock className="w-5 h-5" />
           <span>Study Session</span>
@@ -139,16 +139,16 @@ const StudySession: React.FC<StudySessionProps> = ({
             </Select>
           </div>
           
-          <div className="flex justify-center py-6">
+          <div className="flex justify-center py-4 md:py-6">
             <div className="text-center">
-              <div className="text-4xl font-bold tabular-nums mb-2">{formatTime(time)}</div>
-              <div className="text-sm text-muted-foreground">{selectedCourse ? `Studying ${selectedCourse.name}` : "Select a course to begin"}</div>
+              <div className="text-3xl md:text-4xl font-bold tabular-nums mb-2">{formatTime(time)}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">{selectedCourse ? `Studying ${selectedCourse.name}` : "Select a course to begin"}</div>
             </div>
           </div>
           
           <Progress value={progress} className="h-2" />
           
-          <div className="flex space-x-2 justify-center mt-4">
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
             <Button
               variant="outline"
               onClick={handleReset}
@@ -174,7 +174,7 @@ const StudySession: React.FC<StudySessionProps> = ({
           </div>
           
           {selectedCourse && (
-            <div className="text-xs text-center text-muted-foreground mt-4">
+            <div className="text-xs text-center text-muted-foreground mt-2 md:mt-4">
               Tip: Stay focused and avoid distractions for optimal learning.
             </div>
           )}
