@@ -54,6 +54,7 @@ const sampleTasks: Task[] = [
     id: "task-2",
     title: "Read Chapter 5",
     course: {
+      id: "course-4", // Added the required id property
       name: "Economics 101",
       code: "ECON-101",
       color: "amber",
@@ -67,6 +68,7 @@ const sampleTasks: Task[] = [
     id: "task-3",
     title: "Prepare for Linear Algebra Quiz",
     course: {
+      id: "course-3", // Added the required id property
       name: "Linear Algebra",
       code: "MATH-304",
       color: "purple",
@@ -80,6 +82,7 @@ const sampleTasks: Task[] = [
     id: "task-4",
     title: "Review lecture notes",
     course: {
+      id: "course-2", // Added the required id property
       name: "Data Structures",
       code: "CS-201",
       color: "green",
@@ -93,6 +96,7 @@ const sampleTasks: Task[] = [
     id: "task-5",
     title: "Submit Psychology Essay",
     course: {
+      id: "course-5", // Added the required id property
       name: "Introduction to Psychology",
       code: "PSYC-101",
       color: "red",
@@ -106,6 +110,7 @@ const sampleTasks: Task[] = [
     id: "task-6",
     title: "Algorithms Problem Set 2",
     course: {
+      id: "course-6", // Added the required id property
       name: "Algorithms",
       code: "CS-301",
       color: "sky",
@@ -119,6 +124,7 @@ const sampleTasks: Task[] = [
     id: "task-7",
     title: "Economics Quiz 1",
     course: {
+      id: "course-4", // Added the required id property
       name: "Economics 101",
       code: "ECON-101",
       color: "amber",

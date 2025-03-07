@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import CourseCard, { Course } from "@/components/CourseCard";
 import TaskList, { Task } from "@/components/TaskList";
@@ -65,6 +66,7 @@ const sampleTasks: Task[] = [
     id: "task-1",
     title: "Complete ML Assignment 3",
     course: {
+      id: "course-1", // Added the required id property
       name: "Machine Learning",
       code: "CS-433",
       color: "blue",
@@ -78,6 +80,7 @@ const sampleTasks: Task[] = [
     id: "task-2",
     title: "Read Chapter 5",
     course: {
+      id: "course-4", // Added the required id property
       name: "Economics 101",
       code: "ECON-101",
       color: "amber",
@@ -91,6 +94,7 @@ const sampleTasks: Task[] = [
     id: "task-3",
     title: "Prepare for Linear Algebra Quiz",
     course: {
+      id: "course-3", // Added the required id property
       name: "Linear Algebra",
       code: "MATH-304",
       color: "purple",
