@@ -56,13 +56,13 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <div className="h-screen w-64 bg-sidebar fixed left-0 top-0 flex flex-col py-4 border-r border-sidebar-border">
+    <div className="h-screen w-64 bg-sidebar fixed left-0 top-0 flex flex-col py-4 border-r border-sidebar-border overflow-y-auto">
       <div className="px-6 py-4 mb-4">
         <h1 className="text-xl font-bold text-sidebar-foreground">StudyFlow</h1>
         <p className="text-sidebar-foreground/70 text-sm mt-1">AI Study Planner</p>
       </div>
       
-      <div className="space-y-1 px-3 mt-2">
+      <div className="space-y-1 px-3 mt-2 flex-1">
         {navItems.map((item) => (
           <SidebarLink
             key={item.path}

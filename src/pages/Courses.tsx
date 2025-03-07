@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, Filter, BookOpen } from "lucide-react";
@@ -90,12 +91,12 @@ const sampleCourses: Course[] = [
 const Courses: React.FC = () => {
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold mb-2">Your Courses</h1>
           <p className="text-muted-foreground">Manage your courses and track your progress</p>
         </div>
-        <Button>
+        <Button className="self-start sm:self-center">
           <Plus className="w-4 h-4 mr-2" />
           Add Course
         </Button>
@@ -109,8 +110,8 @@ const Courses: React.FC = () => {
             className="pl-10"
           />
         </div>
-        <div className="flex gap-3">
-          <div className="w-48">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="w-full sm:w-48">
             <Select defaultValue="all">
               <SelectTrigger>
                 <SelectValue placeholder="Filter by semester" />
@@ -123,7 +124,7 @@ const Courses: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline">
+          <Button variant="outline" className="w-full sm:w-auto">
             <Filter className="h-4 w-4 mr-2" />
             Filters
           </Button>

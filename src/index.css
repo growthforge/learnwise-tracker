@@ -134,4 +134,20 @@
     @apply opacity-0 animate-slide-up;
     animation-fill-mode: forwards;
   }
+  
+  /* Responsive utility classes */
+  .responsive-container {
+    @apply px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto;
+  }
+  
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  body {
+    @apply overflow-x-hidden;
+  }
 }
