@@ -1,12 +1,15 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Task } from './TaskList';
 import { toast } from 'sonner';
+import TaskTitleField from '@/features/tasks/form/TaskTitleField';
+import TaskCourseField from '@/features/tasks/form/TaskCourseField';
+import TaskDatePriorityFields from '@/features/tasks/form/TaskDatePriorityFields';
+import TaskTimeField from '@/features/tasks/form/TaskTimeField';
+import TaskDescriptionField from '@/features/tasks/form/TaskDescriptionField';
+import TaskFormActions from '@/features/tasks/form/TaskFormActions';
+import { validateTaskForm } from '@/features/tasks/form/taskFormValidation';
 
 interface Course {
   id: string;
@@ -60,27 +63,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim()) {
-      toast.error("Task title is required");
+    if (!validateTaskForm({ title, courseId, dueDate, courses })) {
       return;
     }
     
-    if (!courseId) {
-      toast.error("Please select a course");
-      return;
-    }
-    
-    if (!dueDate) {
-      toast.error("Due date is required");
-      return;
-    }
-    
-    const selectedCourse = courses.find(c => c.id === courseId);
-    
-    if (!selectedCourse) {
-      toast.error("Invalid course selected");
-      return;
-    }
+    const selectedCourse = courses.find(c => c.id === courseId)!;
     
     const taskData: Task = {
       id: initialTask?.id || `task-${Date.now()}`,
@@ -110,90 +97,38 @@ const TaskForm: React.FC<TaskFormProps> = ({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <label htmlFor="title" className="text-sm font-medium">Title</label>
-            <Input 
-              id="title" 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              placeholder="Task title" 
-            />
-          </div>
+          <TaskTitleField 
+            value={title} 
+            onChange={setTitle} 
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="course" className="text-sm font-medium">Course</label>
-            <Select value={courseId} onValueChange={setCourseId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a course" />
-              </SelectTrigger>
-              <SelectContent>
-                {courses.map(course => (
-                  <SelectItem key={course.id} value={course.id}>
-                    <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full bg-${course.color}-500`}></div>
-                      <span>{course.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <TaskCourseField 
+            value={courseId} 
+            onChange={setCourseId} 
+            courses={courses} 
+          />
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="dueDate" className="text-sm font-medium">Due Date</label>
-              <Input 
-                id="dueDate" 
-                type="text" 
-                value={dueDate} 
-                onChange={(e) => setDueDate(e.target.value)} 
-                placeholder="Tomorrow at 11:59 PM" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label htmlFor="priority" className="text-sm font-medium">Priority</label>
-              <Select value={priority} onValueChange={(value: "high" | "medium" | "low") => setPriority(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <TaskDatePriorityFields 
+            dueDate={dueDate}
+            onDueDateChange={setDueDate}
+            priority={priority}
+            onPriorityChange={setPriority}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="estimatedTime" className="text-sm font-medium">Estimated Hours</label>
-            <Input 
-              id="estimatedTime" 
-              type="number" 
-              min="0.5" 
-              step="0.5" 
-              value={estimatedTime} 
-              onChange={(e) => setEstimatedTime(e.target.value)} 
-              placeholder="Estimated hours to complete" 
-            />
-          </div>
+          <TaskTimeField 
+            value={estimatedTime} 
+            onChange={setEstimatedTime} 
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">Description (optional)</label>
-            <Textarea 
-              id="description" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
-              placeholder="Additional details about the task" 
-              rows={3} 
-            />
-          </div>
+          <TaskDescriptionField 
+            value={description} 
+            onChange={setDescription} 
+          />
           
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit">{initialTask ? 'Update Task' : 'Add Task'}</Button>
-          </DialogFooter>
+          <TaskFormActions 
+            onCancel={onClose} 
+            isEditing={!!initialTask} 
+          />
         </form>
       </DialogContent>
     </Dialog>
