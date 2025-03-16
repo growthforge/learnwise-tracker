@@ -1,17 +1,6 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, Search, Filter, Calendar, CheckSquare, Clock, Trash, Pencil } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import TaskList, { Task } from "@/components/TaskList";
+import { Task } from "@/components/TaskList";
 import TaskForm from "@/components/TaskForm";
 import { 
   AlertDialog,
@@ -24,117 +13,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-
-// Sample data
-const sampleCourses = [
-  { id: "course-1", name: "Machine Learning", code: "CS-433", color: "blue" },
-  { id: "course-2", name: "Data Structures", code: "CS-201", color: "green" },
-  { id: "course-3", name: "Linear Algebra", code: "MATH-304", color: "purple" },
-  { id: "course-4", name: "Economics 101", code: "ECON-101", color: "amber" },
-  { id: "course-5", name: "Introduction to Psychology", code: "PSYC-101", color: "red" },
-  { id: "course-6", name: "Algorithms", code: "CS-301", color: "sky" },
-];
-
-const sampleTasks: Task[] = [
-  {
-    id: "task-1",
-    title: "Complete ML Assignment 3",
-    course: {
-      id: "course-1",
-      name: "Machine Learning",
-      code: "CS-433",
-      color: "blue",
-    },
-    due: "Tomorrow at 11:59 PM",
-    completed: false,
-    priority: "high",
-    estimatedTime: 3,
-  },
-  {
-    id: "task-2",
-    title: "Read Chapter 5",
-    course: {
-      id: "course-4", // Added the required id property
-      name: "Economics 101",
-      code: "ECON-101",
-      color: "amber",
-    },
-    due: "Friday at 6:00 PM",
-    completed: false,
-    priority: "medium",
-    estimatedTime: 2,
-  },
-  {
-    id: "task-3",
-    title: "Prepare for Linear Algebra Quiz",
-    course: {
-      id: "course-3", // Added the required id property
-      name: "Linear Algebra",
-      code: "MATH-304",
-      color: "purple",
-    },
-    due: "Next Monday",
-    completed: false,
-    priority: "high",
-    estimatedTime: 4,
-  },
-  {
-    id: "task-4",
-    title: "Review lecture notes",
-    course: {
-      id: "course-2", // Added the required id property
-      name: "Data Structures",
-      code: "CS-201",
-      color: "green",
-    },
-    due: "Tomorrow at 9:00 AM",
-    completed: false,
-    priority: "medium",
-    estimatedTime: 1.5,
-  },
-  {
-    id: "task-5",
-    title: "Submit Psychology Essay",
-    course: {
-      id: "course-5", // Added the required id property
-      name: "Introduction to Psychology",
-      code: "PSYC-101",
-      color: "red",
-    },
-    due: "Next Wednesday",
-    completed: false,
-    priority: "low",
-    estimatedTime: 5,
-  },
-  {
-    id: "task-6",
-    title: "Algorithms Problem Set 2",
-    course: {
-      id: "course-6", // Added the required id property
-      name: "Algorithms",
-      code: "CS-301",
-      color: "sky",
-    },
-    due: "Friday",
-    completed: true,
-    priority: "high",
-    estimatedTime: 4,
-  },
-  {
-    id: "task-7",
-    title: "Economics Quiz 1",
-    course: {
-      id: "course-4", // Added the required id property
-      name: "Economics 101",
-      code: "ECON-101",
-      color: "amber",
-    },
-    due: "Last Monday",
-    completed: true,
-    priority: "medium",
-    estimatedTime: 2,
-  },
-];
+import { sampleTasks, sampleCourses } from "@/features/tasks/taskUtils";
+import TaskHeader from "@/features/tasks/TaskHeader";
+import TaskSearchFilters from "@/features/tasks/TaskSearchFilters";
+import TaskTabs from "@/features/tasks/TaskTabs";
+import WorkTimeSummary from "@/features/tasks/WorkTimeSummary";
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>(sampleTasks);
@@ -205,127 +88,30 @@ const Tasks: React.FC = () => {
     });
   
   const pendingTasks = filteredTasks.filter(task => !task.completed);
-  const completedTasks = filteredTasks.filter(task => task.completed);
   
   return (
     <>
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Tasks & Assignments</h1>
-          <p className="text-muted-foreground">Manage your tasks and assignments for all courses</p>
-        </div>
-        <Button onClick={() => {
-          setTaskToEdit(undefined);
-          setIsFormOpen(true);
-        }}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Task
-        </Button>
-      </div>
+      <TaskHeader onAddTaskClick={() => {
+        setTaskToEdit(undefined);
+        setIsFormOpen(true);
+      }} />
 
-      <div className="mb-8 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search tasks..." 
-            className="pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-3">
-          <div className="w-48">
-            <Select 
-              value={courseFilter} 
-              onValueChange={setCourseFilter}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by course" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Courses</SelectItem>
-                {sampleCourses.map(course => (
-                  <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filters
-          </Button>
-        </div>
-      </div>
+      <TaskSearchFilters 
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        courseFilter={courseFilter}
+        setCourseFilter={setCourseFilter}
+      />
 
-      <Tabs defaultValue="pending" className="mb-8">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="pending" className="flex items-center gap-2">
-            <Clock className="h-4 w-4" />
-            <span>Pending</span>
-          </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center gap-2">
-            <CheckSquare className="h-4 w-4" />
-            <span>Completed</span>
-          </TabsTrigger>
-          <TabsTrigger value="all" className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>All Tasks</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="pending" className="mt-6">
-          <TaskList
-            tasks={pendingTasks}
-            title="Pending Tasks"
-            emptyMessage="No pending tasks"
-            onTaskToggle={handleTaskToggle}
-            onTaskClick={handleTaskClick}
-            onTaskEdit={openEditForm}
-            onTaskDelete={setTaskToDelete}
-          />
-        </TabsContent>
-        
-        <TabsContent value="completed" className="mt-6">
-          <TaskList
-            tasks={completedTasks}
-            title="Completed Tasks"
-            emptyMessage="No completed tasks"
-            onTaskToggle={handleTaskToggle}
-            onTaskClick={handleTaskClick}
-            onTaskEdit={openEditForm}
-            onTaskDelete={setTaskToDelete}
-          />
-        </TabsContent>
-        
-        <TabsContent value="all" className="mt-6">
-          <TaskList
-            tasks={filteredTasks}
-            title="All Tasks"
-            emptyMessage="No tasks available"
-            onTaskToggle={handleTaskToggle}
-            onTaskClick={handleTaskClick}
-            onTaskEdit={openEditForm}
-            onTaskDelete={setTaskToDelete}
-          />
-        </TabsContent>
-      </Tabs>
+      <TaskTabs 
+        filteredTasks={filteredTasks}
+        onTaskToggle={handleTaskToggle}
+        onTaskClick={handleTaskClick}
+        onTaskEdit={openEditForm}
+        onTaskDelete={setTaskToDelete}
+      />
 
-      <div className="bg-secondary/50 border subtle-border p-4 rounded-lg">
-        <div className="flex items-start gap-4">
-          <div className="bg-primary/10 p-2 rounded-full">
-            <Clock className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-medium mb-1">Total Estimated Work Time</h3>
-            <p className="text-sm text-muted-foreground mb-2">
-              You have approximately <span className="font-medium">{pendingTasks.reduce((acc, task) => acc + (task.estimatedTime || 0), 0)} hours</span> of work remaining for pending tasks.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              The AI assistant recommends allocating at least 2 hours today to work on high-priority assignments.
-            </p>
-          </div>
-        </div>
-      </div>
+      <WorkTimeSummary pendingTasks={pendingTasks} />
 
       {/* Task Form Modal */}
       {isFormOpen && (
