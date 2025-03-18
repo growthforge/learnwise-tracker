@@ -26,9 +26,15 @@ import {
 } from "@/components/ui/select";
 import { Task } from "@/components/TaskList";
 
+// Extend the Task interface to include properties needed for the calendar
+interface ExtendedTask extends Task {
+  dueDate?: string | Date;
+  courseId?: string;
+}
+
 interface CourseCalendarViewProps {
   courses: Course[];
-  tasks?: Task[];
+  tasks?: ExtendedTask[];
 }
 
 // Sample data structure for events
@@ -76,7 +82,7 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks 
       }
     });
     
-    // Add task events
+    // Add task events - using the ExtendedTask interface
     tasks.forEach(task => {
       if (task.dueDate) {
         events.push({
@@ -84,8 +90,8 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks 
           title: task.title,
           date: new Date(task.dueDate),
           type: task.completed ? 'completed' : 'task',
-          courseId: task.courseId,
-          courseColor: courses.find(c => c.id === task.courseId)?.color
+          courseId: task.course.id, // Use task.course.id instead of task.courseId
+          courseColor: courses.find(c => c.id === task.course.id)?.color
         });
       }
     });
@@ -174,7 +180,7 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks 
               onSelect={(newDate) => newDate && setDate(newDate)}
               className="rounded-md border pointer-events-auto"
               components={{
-                DayContent: ({ day }) => (
+                DayContent: ({ day, ...props }) => (
                   <>
                     {day.getDate()}
                     {renderDay(day, events)}

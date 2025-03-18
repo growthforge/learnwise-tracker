@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ViewGrid, Calendar } from "lucide-react";
+import { LayoutGrid, Calendar } from "lucide-react";
 import { 
   CourseHeader, 
   CourseSearchFilters, 
@@ -54,7 +54,7 @@ const Courses: React.FC = () => {
       >
         <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
           <TabsTrigger value="grid" className="flex items-center gap-2">
-            <ViewGrid className="h-4 w-4" />
+            <LayoutGrid className="h-4 w-4" />
             <span>Grid View</span>
           </TabsTrigger>
           <TabsTrigger value="calendar" className="flex items-center gap-2">
