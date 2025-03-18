@@ -180,10 +180,10 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks 
               onSelect={(newDate) => newDate && setDate(newDate)}
               className="rounded-md border pointer-events-auto"
               components={{
-                DayContent: ({ day, ...props }) => (
+                DayContent: (props) => (
                   <>
-                    {day.getDate()}
-                    {renderDay(day, events)}
+                    {props.date.getDate()}
+                    {renderDay(props.date, events)}
                   </>
                 ),
               }}
