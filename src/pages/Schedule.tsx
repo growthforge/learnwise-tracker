@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { sampleCourses } from "@/features/courses/coursesData";
-import AcademicCalendar from "@/features/calendar/AcademicCalendar";
+import AcademicCalendar, { StudySession } from "@/features/calendar/AcademicCalendar";
+import { toast } from "sonner";
 
 // Sample tasks for the calendar view
 const sampleTasks = [
@@ -55,12 +56,11 @@ const sampleTasks = [
 ];
 
 // Sample study sessions for the calendar
-const sampleSessions = [
+const initialSessions: StudySession[] = [
   {
     id: "session-1",
     title: "Study Session: Machine Learning",
     date: new Date(new Date().setHours(new Date().getHours() + 5)),
-    type: "session" as const,
     courseId: "course-1",
     courseColor: "blue",
     description: "Group study in library",
@@ -70,7 +70,6 @@ const sampleSessions = [
     id: "session-2",
     title: "Study Session: Economics",
     date: new Date(new Date().setDate(new Date().getDate() + 2)),
-    type: "session" as const,
     courseId: "course-4",
     courseColor: "amber",
     description: "Review session before quiz",
@@ -79,6 +78,29 @@ const sampleSessions = [
 ];
 
 const Schedule: React.FC = () => {
+  const [studySessions, setStudySessions] = useState<StudySession[]>(initialSessions);
+  
+  const handleAddSession = (session: StudySession) => {
+    setStudySessions([...studySessions, session]);
+    toast.success("Study session added to calendar");
+  };
+  
+  const handleUpdateSession = (updatedSession: StudySession) => {
+    setStudySessions(
+      studySessions.map(session => 
+        session.id === updatedSession.id ? updatedSession : session
+      )
+    );
+    toast.success("Study session updated");
+  };
+  
+  const handleDeleteSession = (sessionId: string) => {
+    setStudySessions(
+      studySessions.filter(session => session.id !== sessionId)
+    );
+    toast.success("Study session deleted");
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Academic Schedule</h1>
@@ -89,6 +111,10 @@ const Schedule: React.FC = () => {
       <AcademicCalendar 
         courses={sampleCourses}
         tasks={sampleTasks}
+        sessions={studySessions}
+        onAddSession={handleAddSession}
+        onUpdateSession={handleUpdateSession}
+        onDeleteSession={handleDeleteSession}
       />
     </div>
   );

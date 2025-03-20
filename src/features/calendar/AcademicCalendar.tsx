@@ -19,7 +19,10 @@ import {
   CheckSquare, 
   ClipboardList,
   Filter,
-  X
+  Plus,
+  Clock,
+  PencilLine,
+  Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -42,10 +45,33 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Extend the Task interface to include properties needed for the calendar
 interface ExtendedTask extends Task {
   dueDate?: string | Date;
+}
+
+export interface StudySession {
+  id: string;
+  title: string;
+  date: Date;
+  courseId: string;
+  courseColor?: string;
+  description?: string;
+  duration: number; // in minutes
 }
 
 export interface CalendarEvent {
@@ -62,13 +88,21 @@ export interface CalendarEvent {
 interface AcademicCalendarProps {
   courses: Course[];
   tasks?: ExtendedTask[];
+  sessions?: StudySession[];
+  onAddSession?: (session: StudySession) => void;
+  onUpdateSession?: (session: StudySession) => void;
+  onDeleteSession?: (sessionId: string) => void;
   showFilters?: boolean;
   className?: string;
 }
 
 const AcademicCalendar: React.FC<AcademicCalendarProps> = ({ 
   courses, 
-  tasks = [], 
+  tasks = [],
+  sessions = [],
+  onAddSession,
+  onUpdateSession,
+  onDeleteSession,
   showFilters = true,
   className
 }) => {
@@ -77,6 +111,13 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
   const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState<string[]>(courses.map(c => c.id));
   const [eventTypeFilters, setEventTypeFilters] = useState<string[]>(["class", "task", "completed", "deadline", "session"]);
+  
+  // Session form state
+  const [isSessionFormOpen, setIsSessionFormOpen] = useState(false);
+  const [sessionToEdit, setSessionToEdit] = useState<StudySession | null>(null);
+  const [newSessionDate, setNewSessionDate] = useState<Date | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [sessionToDelete, setSessionToDelete] = useState<StudySession | null>(null);
   
   // Toggle course selection in filters
   const toggleCourseFilter = (courseId: string) => {
@@ -94,6 +135,82 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
     } else {
       setEventTypeFilters([...eventTypeFilters, type]);
     }
+  };
+  
+  // Open session form for adding
+  const handleAddSession = (date: Date) => {
+    setNewSessionDate(date);
+    setSessionToEdit(null);
+    setIsSessionFormOpen(true);
+  };
+  
+  // Open session form for editing
+  const handleEditSession = (session: StudySession) => {
+    setSessionToEdit(session);
+    setNewSessionDate(null);
+    setIsSessionFormOpen(true);
+  };
+  
+  // Handle delete session confirmation
+  const handleDeleteSession = (session: StudySession) => {
+    setSessionToDelete(session);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Confirm session deletion
+  const confirmDeleteSession = () => {
+    if (sessionToDelete && onDeleteSession) {
+      onDeleteSession(sessionToDelete.id);
+      toast.success("Study session deleted");
+      setIsDeleteDialogOpen(false);
+      setSessionToDelete(null);
+    }
+  };
+  
+  // Handle save session (add or update)
+  const handleSaveSession = (sessionData: {
+    title: string;
+    courseId: string;
+    description?: string;
+    duration: number;
+    date: Date;
+  }) => {
+    const course = courses.find(c => c.id === sessionData.courseId);
+    
+    if (!course) {
+      toast.error("Please select a valid course");
+      return;
+    }
+    
+    if (sessionToEdit) {
+      // Update existing session
+      const updatedSession: StudySession = {
+        ...sessionToEdit,
+        ...sessionData,
+        courseColor: course.color
+      };
+      
+      if (onUpdateSession) {
+        onUpdateSession(updatedSession);
+        toast.success("Study session updated");
+      }
+    } else {
+      // Create new session
+      const newSession: StudySession = {
+        id: `session-${Date.now()}`,
+        ...sessionData,
+        courseColor: course.color
+      };
+      
+      if (onAddSession) {
+        onAddSession(newSession);
+        toast.success("Study session added");
+      }
+    }
+    
+    setIsSessionFormOpen(false);
+    setSessionToEdit(null);
+    setNewSessionDate(null);
   };
   
   // Generate calendar events
@@ -178,6 +295,20 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
       }
     });
     
+    // Add study session events
+    sessions.forEach(session => {
+      events.push({
+        id: `session-${session.id}`,
+        title: session.title,
+        date: new Date(session.date),
+        type: 'session',
+        courseId: session.courseId,
+        courseColor: session.courseColor,
+        description: session.description,
+        duration: session.duration
+      });
+    });
+    
     return events;
   };
 
@@ -196,6 +327,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
     if (viewFilter === "classes" && event.type === "class") return true;
     if (viewFilter === "tasks" && (event.type === "task" || event.type === "deadline")) return true;
     if (viewFilter === "completed" && event.type === "completed") return true;
+    if (viewFilter === "sessions" && event.type === "session") return true;
     
     return false;
   });
@@ -229,6 +361,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
     const classEvents = dayEvents.filter(e => e.type === 'class');
     const taskEvents = dayEvents.filter(e => e.type === 'task');
     const completedEvents = dayEvents.filter(e => e.type === 'completed');
+    const sessionEvents = dayEvents.filter(e => e.type === 'session');
     
     return (
       <div className="relative">
@@ -243,7 +376,10 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
             {completedEvents.length > 0 && (
               <div className="h-1 w-1 rounded-full bg-green-500" />
             )}
-            {dayEvents.length > 3 && (
+            {sessionEvents.length > 0 && (
+              <div className="h-1 w-1 rounded-full bg-purple-500" />
+            )}
+            {dayEvents.length > 4 && (
               <div className="h-1 w-1 rounded-full bg-gray-400" />
             )}
           </div>
@@ -279,6 +415,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 <SelectItem value="classes">Classes Only</SelectItem>
                 <SelectItem value="tasks">Tasks & Deadlines</SelectItem>
                 <SelectItem value="completed">Completed Tasks</SelectItem>
+                <SelectItem value="sessions">Study Sessions</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -316,6 +453,21 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 <div className="h-2 w-2 rounded-full bg-green-500"></div>
                 <span>Completed</span>
               </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-purple-500"></div>
+                <span>Study Sessions</span>
+              </div>
+            </div>
+            
+            <div className="mt-4">
+              <Button 
+                onClick={() => handleAddSession(date)} 
+                variant="outline" 
+                className="w-full"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Study Session
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -336,12 +488,18 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                 }).map((event) => {
                   const EventIcon = 
                     event.type === 'class' ? BookOpen :
-                    event.type === 'completed' ? CheckSquare : ClipboardList;
+                    event.type === 'completed' ? CheckSquare : 
+                    event.type === 'session' ? Clock : ClipboardList;
                     
+                  const isSession = event.type === 'session';
+                  
                   return (
                     <div 
                       key={event.id}
-                      className="flex items-start p-3 border rounded-md"
+                      className={cn(
+                        "flex items-start p-3 border rounded-md",
+                        isSession && "hover:bg-accent/50 cursor-pointer"
+                      )}
                       style={{
                         borderLeftWidth: '4px',
                         borderLeftColor: `var(--${event.courseColor || 'primary'}-500)`
@@ -359,8 +517,39 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                               {event.duration && ` • ${event.duration < 60 ? `${event.duration}m` : `${Math.floor(event.duration / 60)}h${event.duration % 60 ? ` ${event.duration % 60}m` : ''}`}`}
                             </p>
                           </div>
-                          <div className="text-xs px-2 py-0.5 rounded-full bg-muted">
-                            {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                          <div className="flex items-center">
+                            <div className="text-xs px-2 py-0.5 rounded-full bg-muted">
+                              {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                            </div>
+                            
+                            {isSession && (
+                              <div className="flex ml-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const session = sessions.find(s => `session-${s.id}` === event.id);
+                                    if (session) handleEditSession(session);
+                                  }}
+                                >
+                                  <PencilLine className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const session = sessions.find(s => `session-${s.id}` === event.id);
+                                    if (session) handleDeleteSession(session);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         </div>
                         {event.description && (
@@ -421,6 +610,16 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                   <CheckSquare className="w-4 h-4" /> Completed Tasks
                 </Label>
               </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="filter-sessions" 
+                  checked={eventTypeFilters.includes('session')} 
+                  onCheckedChange={() => toggleEventTypeFilter('session')}
+                />
+                <Label htmlFor="filter-sessions" className="flex items-center gap-1.5">
+                  <Clock className="w-4 h-4" /> Study Sessions
+                </Label>
+              </div>
             </div>
           
             <Separator className="my-4" />
@@ -455,7 +654,217 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+      
+      {/* Session Form Dialog */}
+      <Dialog open={isSessionFormOpen} onOpenChange={(open) => !open && setIsSessionFormOpen(false)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{sessionToEdit ? 'Edit Study Session' : 'Add Study Session'}</DialogTitle>
+          </DialogHeader>
+          <SessionForm 
+            courses={courses}
+            onSave={handleSaveSession}
+            onCancel={() => setIsSessionFormOpen(false)}
+            initialSession={sessionToEdit || undefined}
+            initialDate={newSessionDate || undefined}
+          />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Study Session</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this study session? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDeleteSession}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
+  );
+};
+
+// Session Form Component
+interface SessionFormProps {
+  courses: Course[];
+  initialSession?: StudySession;
+  initialDate?: Date;
+  onSave: (sessionData: {
+    title: string;
+    courseId: string;
+    description?: string;
+    duration: number;
+    date: Date;
+  }) => void;
+  onCancel: () => void;
+}
+
+const SessionForm: React.FC<SessionFormProps> = ({
+  courses,
+  initialSession,
+  initialDate,
+  onSave,
+  onCancel
+}) => {
+  const today = new Date();
+  
+  const [title, setTitle] = useState(initialSession?.title || "Study Session");
+  const [courseId, setCourseId] = useState(initialSession?.courseId || "");
+  const [description, setDescription] = useState(initialSession?.description || "");
+  const [duration, setDuration] = useState(initialSession?.duration || 90);
+  const [date, setDate] = useState<Date>(initialSession?.date || initialDate || today);
+  const [time, setTime] = useState(
+    initialSession?.date 
+      ? format(new Date(initialSession.date), "HH:mm") 
+      : format(new Date().setHours(today.getHours() + 1, 0, 0), "HH:mm")
+  );
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!courseId) {
+      toast.error("Please select a course");
+      return;
+    }
+    
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+    
+    // Create date object with time
+    const [hours, minutes] = time.split(':');
+    const sessionDate = new Date(date);
+    sessionDate.setHours(parseInt(hours), parseInt(minutes), 0);
+    
+    onSave({
+      title,
+      courseId,
+      description: description.trim() || undefined,
+      duration,
+      date: sessionDate
+    });
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Study Session Title"
+          required
+        />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="course">Course</Label>
+        <Select value={courseId} onValueChange={setCourseId} required>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a course" />
+          </SelectTrigger>
+          <SelectContent>
+            {courses.map((course) => (
+              <SelectItem key={course.id} value={course.id}>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full bg-${course.color}-500`}></div>
+                  {course.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="date">Date</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(date, "PPP")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(date) => date && setDate(date)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="time">Time</Label>
+          <Input
+            id="time"
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            required
+          />
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="duration">Duration (minutes)</Label>
+        <Select 
+          value={duration.toString()} 
+          onValueChange={(value) => setDuration(parseInt(value))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select duration" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="30">30 minutes</SelectItem>
+            <SelectItem value="60">1 hour</SelectItem>
+            <SelectItem value="90">1.5 hours</SelectItem>
+            <SelectItem value="120">2 hours</SelectItem>
+            <SelectItem value="180">3 hours</SelectItem>
+            <SelectItem value="240">4 hours</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="description">Notes (optional)</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Add any notes or details about this study session"
+          rows={3}
+        />
+      </div>
+      
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          {initialSession ? 'Update Session' : 'Add Session'}
+        </Button>
+      </div>
+    </form>
   );
 };
 

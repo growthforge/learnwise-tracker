@@ -14,7 +14,13 @@ interface CourseCalendarViewProps {
 }
 
 const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks = [] }) => {
-  return <AcademicCalendar courses={courses} tasks={tasks} />;
+  return (
+    <AcademicCalendar 
+      courses={courses} 
+      tasks={tasks} 
+      showFilters={false}
+    />
+  );
 };
 
 export default CourseCalendarView;
