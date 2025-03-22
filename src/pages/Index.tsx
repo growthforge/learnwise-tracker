@@ -1,136 +1,182 @@
 
-import React, { useState } from "react";
-import { toast } from "sonner";
-import DashboardGreeting from "@/components/dashboard/DashboardGreeting";
-import DashboardContent from "@/components/dashboard/DashboardContent";
-import StatsOverview from "@/components/StatsOverview";
-import { Task } from "@/components/TaskList";
-import { sampleCourses } from "@/features/courses";
+import React from "react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
-const sampleTasks: Task[] = [
-  {
-    id: "task-1",
-    title: "Complete ML Assignment 3",
-    course: {
-      id: "course-1",
-      name: "Machine Learning",
-      code: "CS-433",
-      color: "blue",
-    },
-    due: "Tomorrow at 11:59 PM",
-    completed: false,
-    priority: "high",
-    estimatedTime: 3,
-  },
-  {
-    id: "task-2",
-    title: "Read Chapter 5",
-    course: {
-      id: "course-4",
-      name: "Economics 101",
-      code: "ECON-101",
-      color: "amber",
-    },
-    due: "Friday at 6:00 PM",
-    completed: false,
-    priority: "medium",
-    estimatedTime: 2,
-  },
-  {
-    id: "task-3",
-    title: "Prepare for Linear Algebra Quiz",
-    course: {
-      id: "course-3",
-      name: "Linear Algebra",
-      code: "MATH-304",
-      color: "purple",
-    },
-    due: "Next Monday",
-    completed: false,
-    priority: "high",
-    estimatedTime: 4,
-  },
-];
-
-const sampleStats = {
-  totalHours: 124,
-  weeklyHours: 18,
-  totalTasks: 35,
-  completedTasks: 27,
-  streak: 12,
-  weeklyData: [
-    { day: "Mon", hours: 2.5 },
-    { day: "Tue", hours: 3.0 },
-    { day: "Wed", hours: 4.5 },
-    { day: "Thu", hours: 2.0 },
-    { day: "Fri", hours: 3.5 },
-    { day: "Sat", hours: 1.5 },
-    { day: "Sun", hours: 1.0 },
-  ],
-  courseDistribution: [
-    { name: "ML", hours: 24, color: "blue" },
-    { name: "DS", hours: 18, color: "green" },
-    { name: "LA", hours: 20, color: "purple" },
-    { name: "Econ", hours: 12, color: "amber" },
-  ],
-};
-
-const Dashboard: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>(sampleTasks);
-
-  const handleTaskToggle = (taskToToggle: Task) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskToToggle.id
-          ? { ...task, completed: !task.completed }
-          : task
-      )
-    );
-    
-    toast(taskToToggle.completed ? "Task marked as incomplete" : "Task completed!", {
-      description: taskToToggle.title,
-    });
-  };
-
-  const handleSessionComplete = (sessionData: { courseId: string; duration: number; timestamp: Date }) => {
-    const course = sampleCourses.find(c => c.id === sessionData.courseId);
-    
-    toast("Study session completed!", {
-      description: `You studied ${course?.name} for ${Math.floor(sessionData.duration / 60)} minutes.`,
-    });
-  };
-
-  const handleGenerateDetailedPlan = (recommendation: any) => {
-    toast(`Study Plan for ${recommendation.courseName}`, {
-      description: `A detailed study plan is being generated for ${recommendation.recommendedHours} hours of focused study.`,
-    });
-    
-    setTimeout(() => {
-      toast.success("Detailed study plan generated!", {
-        description: "Check your tasks for the new plan."
-      });
-    }, 2000);
-  };
+const Index: React.FC = () => {
+  const { user } = useAuth();
 
   return (
-    <>
-      <DashboardGreeting />
-      
-      <DashboardContent 
-        courses={sampleCourses}
-        tasks={tasks}
-        stats={sampleStats}
-        onTaskToggle={handleTaskToggle}
-        onSessionComplete={handleSessionComplete}
-        onGenerateDetailedPlan={handleGenerateDetailedPlan}
-      />
-
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-6">Study Analytics</h2>
-        <StatsOverview stats={sampleStats} />
-      </div>
-    </>
+    <div className="min-h-screen flex flex-col bg-background">
+      <header className="container mx-auto flex h-16 items-center justify-between px-4">
+        <div className="flex items-center">
+          <span className="font-bold text-xl">StudyFlow</span>
+        </div>
+        <nav className="flex items-center gap-4">
+          {user ? (
+            <Link to="/dashboard">
+              <Button>Dashboard</Button>
+            </Link>
+          ) : (
+            <Link to="/auth">
+              <Button>Sign In</Button>
+            </Link>
+          )}
+        </nav>
+      </header>
+      <main className="flex-1">
+        <section className="py-12 md:py-24 lg:py-32">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
+              <div className="space-y-4">
+                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                  The Intelligent Academic Planner
+                </h1>
+                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  Organize your courses, manage assignments, and optimize your study time with AI-powered insights.
+                </p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {user ? (
+                    <Link to="/dashboard">
+                      <Button size="lg">Go to Dashboard</Button>
+                    </Link>
+                  ) : (
+                    <Link to="/auth">
+                      <Button size="lg">Get Started</Button>
+                    </Link>
+                  )}
+                  <Button variant="outline" size="lg">
+                    Learn More
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <img
+                  src="/placeholder.svg"
+                  alt="StudyFlow Dashboard"
+                  width={600}
+                  height={400}
+                  className="aspect-video rounded-xl object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+                Features
+              </h2>
+              <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[700px] mx-auto">
+                Everything you need to excel in your academic journey
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <GraduationCap className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Course Management</h3>
+                <p className="text-muted-foreground">
+                  Keep track of all your courses, deadlines, and class schedules in one place.
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <CheckSquare className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Task Tracking</h3>
+                <p className="text-muted-foreground">
+                  Manage assignments, readings, and projects with priority-based task lists.
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <Clock className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Study Sessions</h3>
+                <p className="text-muted-foreground">
+                  Track focused study time and build consistent learning habits.
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <Calendar className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Calendar Integration</h3>
+                <p className="text-muted-foreground">
+                  View all your academic commitments in a comprehensive calendar.
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <BarChart3 className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Analytics</h3>
+                <p className="text-muted-foreground">
+                  Gain insights into your study habits and academic performance.
+                </p>
+              </div>
+              <div className="bg-card p-6 rounded-lg shadow">
+                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
+                  <BrainCircuit className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold mb-2">AI Recommendations</h3>
+                <p className="text-muted-foreground">
+                  Receive personalized study plans and optimization suggestions.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section className="py-12 md:py-24 lg:py-32">
+          <div className="container mx-auto px-4 md:px-6 text-center">
+            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">
+              Ready to Boost Your Academic Performance?
+            </h2>
+            <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[700px] mx-auto mb-6">
+              Join thousands of students who are already optimizing their study time with StudyFlow.
+            </p>
+            {user ? (
+              <Link to="/dashboard">
+                <Button size="lg">Go to Dashboard</Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button size="lg">Get Started for Free</Button>
+              </Link>
+            )}
+          </div>
+        </section>
+      </main>
+      <footer className="border-t py-6">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-center md:text-left">
+              <p className="text-sm text-muted-foreground">
+                © 2023 StudyFlow. All rights reserved.
+              </p>
+            </div>
+            <div className="flex gap-4">
+              <a href="#" className="text-sm text-muted-foreground hover:underline">
+                Privacy Policy
+              </a>
+              <a href="#" className="text-sm text-muted-foreground hover:underline">
+                Terms of Service
+              </a>
+              <a href="#" className="text-sm text-muted-foreground hover:underline">
+                Contact
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 
-export default Dashboard;
+import { BrainCircuit, GraduationCap, CheckSquare, Clock, Calendar, BarChart3 } from "lucide-react";
+
+export default Index;

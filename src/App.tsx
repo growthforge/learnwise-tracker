@@ -1,41 +1,82 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Tasks from "./pages/Tasks";
-import Courses from "./pages/Courses";
-import Analytics from "./pages/Analytics";
-import Schedule from "./pages/Schedule";
-import Sessions from "./pages/Sessions";
-import Settings from "./pages/Settings";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import Layout from './components/Layout';
+import Index from './pages/Index';
+import Dashboard from './pages/Dashboard';
+import Courses from './pages/Courses';
+import Tasks from './pages/Tasks';
+import Schedule from './pages/Schedule';
+import Sessions from './pages/Sessions';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
+import Auth from './pages/Auth';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
 
-// Create a client
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/courses" element={<Layout><Courses /></Layout>} />
-          <Route path="/tasks" element={<Layout><Tasks /></Layout>} />
-          <Route path="/sessions" element={<Layout><Sessions /></Layout>} />
-          <Route path="/schedule" element={<Layout><Schedule /></Layout>} />
-          <Route path="/analytics" element={<Layout><Analytics /></Layout>} />
-          <Route path="/settings" element={<Layout><Settings /></Layout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <AuthProvider>
+      <Toaster position="top-right" richColors />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/courses" element={
+          <ProtectedRoute>
+            <Layout>
+              <Courses />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/tasks" element={
+          <ProtectedRoute>
+            <Layout>
+              <Tasks />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/schedule" element={
+          <ProtectedRoute>
+            <Layout>
+              <Schedule />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/sessions" element={
+          <ProtectedRoute>
+            <Layout>
+              <Sessions />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/analytics" element={
+          <ProtectedRoute>
+            <Layout>
+              <Analytics />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Layout>
+              <Settings />
+            </Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
+  );
+}
 
 export default App;
