@@ -1,8 +1,12 @@
+
 import React, { useState } from "react";
 import { sampleCourses } from "@/features/courses/coursesData";
 import AcademicCalendar from "@/features/calendar/AcademicCalendar";
 import { StudySession } from "@/features/calendar/types";
+import { AIScheduleSuggestion } from "@/services/aiService";
 import { toast } from "sonner";
+import AIScheduleSuggestions from "@/features/ai/AIScheduleSuggestions";
+import { v4 as uuidv4 } from "uuid";
 
 // Sample tasks for the calendar view
 const sampleTasks = [
@@ -102,6 +106,59 @@ const Schedule: React.FC = () => {
     toast.success("Study session deleted");
   };
 
+  // Convert study sessions to a format that the AI can understand
+  const getFormattedSchedule = () => {
+    return studySessions.map(session => ({
+      day: new Date(session.date).toLocaleDateString('en-US', { weekday: 'long' }),
+      time: new Date(session.date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      courseName: sampleCourses.find(c => c.id === session.courseId)?.name || 'Unknown Course',
+      duration: session.duration
+    }));
+  };
+
+  // Handle applying AI suggestion to the schedule
+  const handleApplySuggestion = (suggestion: AIScheduleSuggestion) => {
+    // Find the course that matches the suggested course name
+    const course = sampleCourses.find(c => c.name === suggestion.courseName);
+    
+    if (!course) {
+      toast.error(`Could not find course: ${suggestion.courseName}`);
+      return;
+    }
+    
+    // Parse the day of week and time to create a Date object
+    const dayMap: Record<string, number> = {
+      "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6, "Sunday": 0
+    };
+    
+    const today = new Date();
+    const dayOfWeek = dayMap[suggestion.dayOfWeek];
+    const currentDay = today.getDay();
+    const daysUntilSession = (dayOfWeek - currentDay + 7) % 7;
+    
+    const sessionDate = new Date();
+    sessionDate.setDate(today.getDate() + daysUntilSession);
+    
+    // Set the time from the suggestion
+    const [hours, minutes] = suggestion.startTime.split(':').map(Number);
+    sessionDate.setHours(hours, minutes, 0, 0);
+    
+    // Create a new study session
+    const newSession: StudySession = {
+      id: `ai-suggested-${uuidv4()}`,
+      title: `Study Session: ${course.name}`,
+      date: sessionDate,
+      courseId: course.id,
+      courseColor: course.color,
+      description: `AI suggested: ${suggestion.reason}`,
+      duration: suggestion.duration
+    };
+    
+    // Add the session to the list
+    setStudySessions([...studySessions, newSession]);
+    toast.success(`Added ${course.name} study session on ${suggestion.dayOfWeek}`);
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Academic Schedule</h1>
@@ -109,21 +166,32 @@ const Schedule: React.FC = () => {
         View and manage your academic schedule, including classes, tasks, and study sessions.
       </p>
       
-      <AcademicCalendar 
-        courses={sampleCourses}
-        tasks={sampleTasks}
-        sessions={studySessions}
-        onAddSession={handleAddSession}
-        onUpdateSession={handleUpdateSession}
-        onEditSession={sessionId => {
-          // Find the session and open edit form
-          const session = studySessions.find(s => s.id === sessionId);
-          if (session) {
-            // The actual form will be opened by the AcademicCalendar component
-          }
-        }}
-        onDeleteSession={handleDeleteSession}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AcademicCalendar 
+            courses={sampleCourses}
+            tasks={sampleTasks}
+            sessions={studySessions}
+            onAddSession={handleAddSession}
+            onUpdateSession={handleUpdateSession}
+            onEditSession={sessionId => {
+              // Find the session and open edit form
+              const session = studySessions.find(s => s.id === sessionId);
+              if (session) {
+                // The actual form will be opened by the AcademicCalendar component
+              }
+            }}
+            onDeleteSession={handleDeleteSession}
+          />
+        </div>
+        <div>
+          <AIScheduleSuggestions 
+            courses={sampleCourses}
+            existingSchedule={getFormattedSchedule()}
+            onApplySuggestion={handleApplySuggestion}
+          />
+        </div>
+      </div>
     </div>
   );
 };
