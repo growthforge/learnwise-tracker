@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LayoutGrid, Calendar } from "lucide-react";
+import { toast } from "sonner";
 import { 
   CourseHeader, 
   CourseSearchFilters, 
@@ -9,11 +10,14 @@ import {
   CourseCalendarView,
   sampleCourses
 } from "@/features/courses";
+import { sampleTasks } from "@/features/tasks/taskUtils";
+import { StudySession } from "@/features/calendar/AcademicCalendar";
 
 const Courses: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [semesterFilter, setSemesterFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("grid");
+  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
 
   // Filter courses based on search term and semester filter
   const filteredCourses = sampleCourses.filter(course => {
@@ -33,6 +37,27 @@ const Courses: React.FC = () => {
   const handleOpenFilters = () => {
     // In a real application, this would open a more advanced filters panel
     console.log("Open filters clicked");
+  };
+
+  const handleAddSession = (session: StudySession) => {
+    setStudySessions([...studySessions, session]);
+    toast.success("Study session added to calendar");
+  };
+  
+  const handleUpdateSession = (updatedSession: StudySession) => {
+    setStudySessions(
+      studySessions.map(session => 
+        session.id === updatedSession.id ? updatedSession : session
+      )
+    );
+    toast.success("Study session updated");
+  };
+  
+  const handleDeleteSession = (sessionId: string) => {
+    setStudySessions(
+      studySessions.filter(session => session.id !== sessionId)
+    );
+    toast.success("Study session deleted");
   };
 
   return (
@@ -73,6 +98,10 @@ const Courses: React.FC = () => {
         <TabsContent value="calendar">
           <CourseCalendarView 
             courses={sampleCourses}
+            tasks={sampleTasks}
+            onAddSession={handleAddSession}
+            onUpdateSession={handleUpdateSession}
+            onDeleteSession={handleDeleteSession}
           />
         </TabsContent>
       </Tabs>

@@ -11,14 +11,26 @@ interface ExtendedTask extends Task {
 interface CourseCalendarViewProps {
   courses: Course[];
   tasks?: ExtendedTask[];
+  onAddSession?: (session: any) => void;
+  onUpdateSession?: (session: any) => void;
+  onDeleteSession?: (sessionId: string) => void;
 }
 
-const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ courses, tasks = [] }) => {
+const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({ 
+  courses, 
+  tasks = [],
+  onAddSession,
+  onUpdateSession,
+  onDeleteSession 
+}) => {
   return (
     <AcademicCalendar 
       courses={courses} 
       tasks={tasks} 
-      showFilters={false}
+      showFilters={true}
+      onAddSession={onAddSession}
+      onUpdateSession={onUpdateSession}
+      onDeleteSession={onDeleteSession}
     />
   );
 };
