@@ -1,64 +1,11 @@
-import React, { useState } from "react";
-import CourseCard, { Course } from "@/components/CourseCard";
-import TaskList, { Task } from "@/components/TaskList";
-import StudySession from "@/components/StudySession";
-import StatsOverview, { StudyStats } from "@/components/StatsOverview";
-import { CheckSquare, ArrowRight, BrainCircuit, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { toast } from "sonner";
-import AIStudyRecommendations from "@/features/ai/AIStudyRecommendations";
 
-const sampleCourses: Course[] = [
-  {
-    id: "course-1",
-    name: "Machine Learning",
-    code: "CS-433",
-    professor: "Dr. Smith",
-    color: "blue",
-    progress: 65,
-    upcomingDeadlines: 2,
-    totalHoursSpent: 24,
-    nextClass: {
-      day: "Wednesday",
-      time: "10:00 AM",
-    },
-  },
-  {
-    id: "course-2",
-    name: "Data Structures",
-    code: "CS-201",
-    professor: "Dr. Johnson",
-    color: "green",
-    progress: 48,
-    upcomingDeadlines: 1,
-    totalHoursSpent: 18,
-  },
-  {
-    id: "course-3",
-    name: "Linear Algebra",
-    code: "MATH-304",
-    professor: "Dr. Williams",
-    color: "purple",
-    progress: 72,
-    upcomingDeadlines: 3,
-    totalHoursSpent: 20,
-    nextClass: {
-      day: "Thursday",
-      time: "2:00 PM",
-    },
-  },
-  {
-    id: "course-4",
-    name: "Economics 101",
-    code: "ECON-101",
-    professor: "Dr. Davis",
-    color: "amber",
-    progress: 30,
-    upcomingDeadlines: 1,
-    totalHoursSpent: 12,
-  },
-];
+import React, { useState } from "react";
+import { toast } from "sonner";
+import DashboardGreeting from "@/components/dashboard/DashboardGreeting";
+import DashboardContent from "@/components/dashboard/DashboardContent";
+import StatsOverview from "@/components/StatsOverview";
+import { Task } from "@/components/TaskList";
+import { sampleCourses } from "@/features/courses";
 
 const sampleTasks: Task[] = [
   {
@@ -105,7 +52,7 @@ const sampleTasks: Task[] = [
   },
 ];
 
-const sampleStats: StudyStats = {
+const sampleStats = {
   totalHours: 124,
   weeklyHours: 18,
   totalTasks: 35,
@@ -167,93 +114,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Hello, Student</h1>
-        <p className="text-muted-foreground">Here's an overview of your study progress</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div className="col-span-2 space-y-6">
-          <AIStudyRecommendations
-            courses={sampleCourses}
-            tasks={sampleTasks}
-            studyHours={sampleStats.weeklyData.map(d => d.hours)}
-            onGenerateDetailedPlan={handleGenerateDetailedPlan}
-            className="hover-card glass-card"
-          />
-
-          <TaskList
-            tasks={tasks.filter(t => !t.completed).slice(0, 3)}
-            title="Priority Tasks"
-            emptyMessage="No tasks due soon"
-            showViewAll={true}
-            onTaskToggle={handleTaskToggle}
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {sampleCourses.slice(0, 2).map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <StudySession 
-            courses={sampleCourses} 
-            onSessionComplete={handleSessionComplete}
-          />
-          
-          <Card className="hover-card">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-medium">Tasks Progress</h3>
-                <div className="bg-green-100 p-1.5 rounded-full dark:bg-green-900/30">
-                  <CheckSquare className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Completed</span>
-                    <span className="font-medium">{sampleStats.completedTasks}/{sampleStats.totalTasks}</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2.5">
-                    <div 
-                      className="bg-green-500 h-2.5 rounded-full" 
-                      style={{width: `${(sampleStats.completedTasks / sampleStats.totalTasks) * 100}%`}}
-                    ></div>
-                  </div>
-                </div>
-                
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span>Study Streak</span>
-                    <span className="font-medium">{sampleStats.streak} days</span>
-                  </div>
-                  <div className="flex gap-1 mt-1">
-                    {Array.from({ length: 7 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className={`h-2.5 flex-1 rounded-full ${
-                          i < 5 ? "bg-primary" : "bg-secondary"
-                        }`}
-                      ></div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 pt-4 border-t text-sm text-muted-foreground">
-                <a href="/analytics" className="flex items-center justify-between hover:text-primary transition-colors">
-                  <span>View detailed analytics</span>
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <DashboardGreeting />
+      
+      <DashboardContent 
+        courses={sampleCourses}
+        tasks={tasks}
+        stats={sampleStats}
+        onTaskToggle={handleTaskToggle}
+        onSessionComplete={handleSessionComplete}
+        onGenerateDetailedPlan={handleGenerateDetailedPlan}
+      />
 
       <div className="mb-6">
         <h2 className="text-xl font-bold mb-6">Study Analytics</h2>
