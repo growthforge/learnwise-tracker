@@ -53,7 +53,7 @@ const CalendarEventItem: React.FC<CalendarEventItemProps> = ({
       )}
       style={{
         borderLeftWidth: '4px',
-        borderLeftColor: `var(--${event.courseColor || 'primary'}-500)`
+        borderLeftColor: event.courseColor ? `var(--${event.courseColor}-500)` : 'var(--primary-500)'
       }}
     >
       <div className="mr-3 mt-0.5">

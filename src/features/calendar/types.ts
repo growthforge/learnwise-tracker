@@ -16,12 +16,12 @@ export interface StudySession {
 export interface CalendarEvent {
   id: string;
   title: string;
-  start: Date;
-  end: Date;
-  allDay?: boolean;
+  date: Date; // Change from start/end to date
   courseId?: string;
-  color?: string;
-  type: 'session' | 'task';
+  courseColor?: string;
+  description?: string;
+  duration?: number;
+  type: 'session' | 'task' | 'class' | 'completed' | 'deadline'; // Include all possible event types
   meta?: any;
 }
 

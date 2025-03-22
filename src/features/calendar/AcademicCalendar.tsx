@@ -24,7 +24,7 @@ import {
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
 import { toast } from "sonner";
-import { CalendarEvent, StudySession } from "./types";
+import { CalendarEvent, StudySession, SessionFormData } from "./types";
 import { generateEvents, filterEvents } from "./utils";
 import { 
   CalendarSidebar,
@@ -132,13 +132,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
   };
   
   // Handle save session (add or update)
-  const handleSaveSession = (sessionData: {
-    title: string;
-    courseId: string;
-    description?: string;
-    duration: number;
-    date: Date;
-  }) => {
+  const handleSaveSession = (sessionData: SessionFormData) => {
     const course = courses.find(c => c.id === sessionData.courseId);
     
     if (!course) {
@@ -146,12 +140,22 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
       return;
     }
     
+    // Create a date from the form data
+    const sessionDate = new Date(sessionData.date);
+    const [hours, minutes] = sessionData.startTime.split(':').map(Number);
+    sessionDate.setHours(hours, minutes, 0, 0);
+    
     if (sessionToEdit) {
       // Update existing session
       const updatedSession: StudySession = {
         ...sessionToEdit,
-        ...sessionData,
-        courseColor: course.color
+        title: sessionData.title || 'Study Session',
+        date: sessionDate,
+        courseId: sessionData.courseId,
+        courseColor: course.color,
+        description: sessionData.notes,
+        duration: sessionData.duration,
+        completed: sessionData.completed
       };
       
       if (onUpdateSession) {
@@ -161,15 +165,18 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
     } else {
       // Create new session
       const newSession: StudySession = {
-        id: `session-${Date.now()}`,
-        ...sessionData,
-        courseColor: course.color
+        id: sessionData.id,
+        title: sessionData.title || 'Study Session',
+        date: sessionDate,
+        courseId: sessionData.courseId,
+        courseColor: course.color,
+        description: sessionData.notes,
+        duration: sessionData.duration,
+        completed: sessionData.completed
       };
       
-      if (onAddSession) {
-        // This function doesn't expect parameters in the current implementation
-        // but we'll keep this code for future updates
-        onAddSession();
+      if (onUpdateSession) {
+        onUpdateSession(newSession);
         toast.success("Study session added");
       }
     }
@@ -302,7 +309,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
           id: sessionToEdit.id,
           courseId: sessionToEdit.courseId,
           title: sessionToEdit.title,
-          date: sessionToEdit.date.toISOString(),
+          date: format(new Date(sessionToEdit.date), 'yyyy-MM-dd'),
           startTime: format(new Date(sessionToEdit.date), 'HH:mm'),
           duration: sessionToEdit.duration,
           completed: sessionToEdit.completed ?? true,
