@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,8 +72,13 @@ const SessionForm: React.FC<SessionFormProps> = ({
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     const sessionData: SessionFormData = {
       id: initialSession?.id || `session-${Date.now()}`,
-      ...data,
+      courseId: data.courseId,
+      title: data.title,
       date: data.date.toISOString(),
+      startTime: data.startTime,
+      duration: data.duration,
+      completed: data.completed,
+      notes: data.notes,
     };
     
     onSave(sessionData);

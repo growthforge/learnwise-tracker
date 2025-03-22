@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { 
@@ -89,8 +88,8 @@ interface AcademicCalendarProps {
   courses: Course[];
   tasks?: ExtendedTask[];
   sessions?: StudySession[];
-  onAddSession?: (session: StudySession) => void;
-  onUpdateSession?: (session: StudySession) => void;
+  onAddSession?: () => void;
+  onEditSession?: (sessionId: string) => void; // Added this prop
   onDeleteSession?: (sessionId: string) => void;
   showFilters?: boolean;
   className?: string;
@@ -101,7 +100,7 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
   tasks = [],
   sessions = [],
   onAddSession,
-  onUpdateSession,
+  onEditSession, // Add this prop
   onDeleteSession,
   showFilters = true,
   className
@@ -531,7 +530,10 @@ const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     const session = sessions.find(s => `session-${s.id}` === event.id);
-                                    if (session) handleEditSession(session);
+                                    if (session) {
+                                      const sessionId = event.id.replace('session-', '');
+                                      if (onEditSession) onEditSession(sessionId);
+                                    }
                                   }}
                                 >
                                   <PencilLine className="h-4 w-4" />

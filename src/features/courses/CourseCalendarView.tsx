@@ -88,7 +88,7 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
         tasks={tasks} 
         showFilters={true}
         onAddSession={handleOpenAddForm}
-        onEditSession={handleOpenEditForm}
+        onEditSession={handleOpenEditForm} // We need to update AcademicCalendar to accept this prop
         onDeleteSession={handleDeleteSession}
       />
       

@@ -31,7 +31,7 @@ export interface ExtendedTask extends Task {
 
 export interface SessionFormData {
   id: string;
-  courseId: string;
+  courseId: string; // This is required
   title?: string;
   date: string; // ISO string
   startTime: string; // HH:MM format
