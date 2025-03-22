@@ -11,7 +11,7 @@ import {
   sampleCourses
 } from "@/features/courses";
 import { sampleTasks } from "@/features/tasks/taskUtils";
-import { StudySession } from "@/features/calendar/AcademicCalendar";
+import { StudySession } from "@/features/calendar/types";
 
 const Courses: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
