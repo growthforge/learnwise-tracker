@@ -154,8 +154,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleGenerateDetailedPlan = (recommendation: any) => {
-    toast({
-      title: `Study Plan for ${recommendation.courseName}`,
+    toast(`Study Plan for ${recommendation.courseName}`, {
       description: `A detailed study plan is being generated for ${recommendation.recommendedHours} hours of focused study.`,
     });
     
