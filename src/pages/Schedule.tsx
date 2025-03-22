@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { sampleCourses } from "@/features/courses/coursesData";
-import AcademicCalendar, { StudySession } from "@/features/calendar/AcademicCalendar";
+import AcademicCalendar from "@/features/calendar/AcademicCalendar";
+import { StudySession } from "@/features/calendar/types";
 import { toast } from "sonner";
 
 // Sample tasks for the calendar view
@@ -80,9 +80,10 @@ const initialSessions: StudySession[] = [
 const Schedule: React.FC = () => {
   const [studySessions, setStudySessions] = useState<StudySession[]>(initialSessions);
   
-  const handleAddSession = (session: StudySession) => {
-    setStudySessions([...studySessions, session]);
-    toast.success("Study session added to calendar");
+  const handleAddSession = () => {
+    // This function will be called when the "Add Session" button is clicked
+    // The actual session will be created in the form and added via handleUpdateSession
+    // This is just to open the form
   };
   
   const handleUpdateSession = (updatedSession: StudySession) => {
@@ -114,6 +115,13 @@ const Schedule: React.FC = () => {
         sessions={studySessions}
         onAddSession={handleAddSession}
         onUpdateSession={handleUpdateSession}
+        onEditSession={sessionId => {
+          // Find the session and open edit form
+          const session = studySessions.find(s => s.id === sessionId);
+          if (session) {
+            // The actual form will be opened by the AcademicCalendar component
+          }
+        }}
         onDeleteSession={handleDeleteSession}
       />
     </div>
