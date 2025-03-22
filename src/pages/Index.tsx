@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import CourseCard, { Course } from "@/components/CourseCard";
 import TaskList, { Task } from "@/components/TaskList";
@@ -8,8 +7,8 @@ import { CheckSquare, ArrowRight, BrainCircuit, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import AIStudyRecommendations from "@/features/ai/AIStudyRecommendations";
 
-// Sample data for demonstration purposes
 const sampleCourses: Course[] = [
   {
     id: "course-1",
@@ -66,7 +65,7 @@ const sampleTasks: Task[] = [
     id: "task-1",
     title: "Complete ML Assignment 3",
     course: {
-      id: "course-1", // Added the required id property
+      id: "course-1",
       name: "Machine Learning",
       code: "CS-433",
       color: "blue",
@@ -80,7 +79,7 @@ const sampleTasks: Task[] = [
     id: "task-2",
     title: "Read Chapter 5",
     course: {
-      id: "course-4", // Added the required id property
+      id: "course-4",
       name: "Economics 101",
       code: "ECON-101",
       color: "amber",
@@ -94,7 +93,7 @@ const sampleTasks: Task[] = [
     id: "task-3",
     title: "Prepare for Linear Algebra Quiz",
     course: {
-      id: "course-3", // Added the required id property
+      id: "course-3",
       name: "Linear Algebra",
       code: "MATH-304",
       color: "purple",
@@ -154,6 +153,19 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const handleGenerateDetailedPlan = (recommendation: any) => {
+    toast({
+      title: `Study Plan for ${recommendation.courseName}`,
+      description: `A detailed study plan is being generated for ${recommendation.recommendedHours} hours of focused study.`,
+    });
+    
+    setTimeout(() => {
+      toast.success("Detailed study plan generated!", {
+        description: "Check your tasks for the new plan."
+      });
+    }, 2000);
+  };
+
   return (
     <>
       <div className="mb-8">
@@ -163,33 +175,13 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div className="col-span-2 space-y-6">
-          <Card className="hover-card glass-card">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <BrainCircuit className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium mb-1">AI Study Recommendation</h3>
-                  <p className="text-muted-foreground text-sm mb-4">
-                    Based on your upcoming deadlines and study patterns, here's what you should focus on today:
-                  </p>
-                  <div className="bg-secondary p-3 rounded-lg mb-4">
-                    <div className="flex gap-2 items-center text-sm font-medium mb-1">
-                      <Sparkles className="w-4 h-4 text-primary" />
-                      <span>Focus on Machine Learning for 2.5 hours today</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Your assignment is due tomorrow and you typically need 3 hours to complete similar assignments.
-                    </p>
-                  </div>
-                  <Button size="sm" className="mt-2">
-                    Generate Detailed Plan <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <AIStudyRecommendations
+            courses={sampleCourses}
+            tasks={sampleTasks}
+            studyHours={sampleStats.weeklyData.map(d => d.hours)}
+            onGenerateDetailedPlan={handleGenerateDetailedPlan}
+            className="hover-card glass-card"
+          />
 
           <TaskList
             tasks={tasks.filter(t => !t.completed).slice(0, 3)}
