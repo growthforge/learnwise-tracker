@@ -1,189 +1,204 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { sampleCourses } from "@/features/courses/coursesData";
-import { sampleTasks } from "@/features/tasks/taskUtils";
-import { DashboardGreeting, DashboardContent, TaskProgress } from "@/components/dashboard";
-import { Course } from "@/components/CourseCard";
-import { useMediaQuery } from "@/hooks/use-mobile";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { DashboardGreeting, DashboardContent } from '@/components/dashboard';
+import { Card } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
-interface StudyStats {
-  totalHours: number;
-  weeklyHours: number;
-  totalTasks: number;
-  completedTasks: number;
-  streak: number;
-  courseDistribution: { id: string; name: string; hours: number; color: string }[];
-  weeklyData: { day: string; hours: number }[];
-}
-
-const Dashboard: React.FC = () => {
-  const [courses, setCourses] = useState<Course[]>(sampleCourses);
-  const isMobile = useMediaQuery("(max-width: 768px)");
-  
-  // Statistics for the dashboard
-  const [studyStats, setStudyStats] = useState<StudyStats>({
-    totalHours: 157.5,
-    weeklyHours: 24.5,
-    totalTasks: 45,
-    completedTasks: 38,
-    streak: 12,
-    courseDistribution: [
-      { id: "course-1", name: "Machine Learning", hours: 45, color: "blue" },
-      { id: "course-2", name: "Data Structures", hours: 32, color: "green" },
-      { id: "course-3", name: "Linear Algebra", hours: 28, color: "purple" },
-      { id: "course-4", name: "Economics 101", hours: 18, color: "amber" },
-      { id: "course-5", name: "Psychology", hours: 12, color: "red" },
-      { id: "course-6", name: "Algorithms", hours: 22.5, color: "sky" },
-    ],
+const Dashboard = () => {
+  const { user } = useAuth();
+  const [userName, setUserName] = useState('');
+  const [stats, setStats] = useState({
     weeklyData: [
-      { day: "Mon", hours: 3.5 },
-      { day: "Tue", hours: 2.0 },
-      { day: "Wed", hours: 4.5 },
-      { day: "Thu", hours: 3.0 },
-      { day: "Fri", hours: 5.5 },
-      { day: "Sat", hours: 2.0 },
-      { day: "Sun", hours: 4.0 },
-    ]
+      { day: 'Mon', hours: 2 },
+      { day: 'Tue', hours: 1.5 },
+      { day: 'Wed', hours: 3 },
+      { day: 'Thu', hours: 2.5 },
+      { day: 'Fri', hours: 1 },
+      { day: 'Sat', hours: 0.5 },
+      { day: 'Sun', hours: 0 }
+    ],
+    totalTasks: 12,
+    completedTasks: 5,
+    streak: 5
   });
+  const [courses, setCourses] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Sample tasks for task list
-  const tasks = sampleTasks.filter(task => !task.completed).slice(0, 5);
-  
-  // For managing task progress simulations
-  const [taskProgress, setTaskProgress] = useState(84);
-  const [studyTime, setStudyTime] = useState(24.5);
-  
-  // Simulate loading analytics data from an API
   useEffect(() => {
-    // In a real app, you'd fetch this data from your backend
-    const fetchAnalytics = async () => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
       try {
-        // Simulating API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // This would be data returned from the API
-        const analyticsData = {
-          totalStudyTime: 157.5,
-          weeklyStudyTime: 24.5,
-          totalTasks: 45,
-          completedTasks: 38,
-          currentStreak: 12,
-          courseDistribution: [
-            { id: "course-1", name: "Machine Learning", hours: 45, color: "blue" },
-            { id: "course-2", name: "Data Structures", hours: 32, color: "green" },
-            { id: "course-3", name: "Linear Algebra", hours: 28, color: "purple" },
-            { id: "course-4", name: "Economics 101", hours: 18, color: "amber" },
-            { id: "course-5", name: "Psychology", hours: 12, color: "red" },
-            { id: "course-6", name: "Algorithms", hours: 22.5, color: "sky" },
-          ],
-          weeklyData: [
-            { day: "Mon", hours: 3.5 },
-            { day: "Tue", hours: 2.0 },
-            { day: "Wed", hours: 4.5 },
-            { day: "Thu", hours: 3.0 },
-            { day: "Fri", hours: 5.5 },
-            { day: "Sat", hours: 2.0 },
-            { day: "Sun", hours: 4.0 },
-          ]
-        };
-        
-        // Update state with fetched data
-        setStudyStats({
-          totalHours: analyticsData.totalStudyTime,
-          weeklyHours: analyticsData.weeklyStudyTime,
-          totalTasks: analyticsData.totalTasks,
-          completedTasks: analyticsData.completedTasks,
-          streak: analyticsData.currentStreak,
-          courseDistribution: analyticsData.courseDistribution,
-          weeklyData: analyticsData.weeklyData
-        });
-        
-        setTaskProgress(Math.round((analyticsData.completedTasks / analyticsData.totalTasks) * 100));
-        setStudyTime(analyticsData.weeklyStudyTime);
+        // Fetch user profile
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', user?.id)
+          .single();
+
+        if (profileData) {
+          const name = `${profileData.first_name} ${profileData.last_name}`.trim();
+          setUserName(name || 'Student');
+        }
+
+        // Fetch courses
+        const { data: coursesData } = await supabase
+          .from('courses')
+          .select('*')
+          .eq('user_id', user?.id);
+          
+        if (coursesData) {
+          setCourses(coursesData.map(course => ({
+            id: course.id,
+            name: course.name,
+            code: course.code,
+            professor: course.professor || '',
+            color: course.color,
+            progress: course.progress || 0,
+            upcoming: course.upcoming_deadlines || 0
+          })));
+        }
+
+        // Fetch tasks
+        const { data: tasksData } = await supabase
+          .from('tasks')
+          .select('*, courses(name, code, color)')
+          .eq('user_id', user?.id)
+          .order('due_date', { ascending: true })
+          .limit(5);
+
+        if (tasksData) {
+          setTasks(tasksData.map(task => ({
+            id: task.id,
+            title: task.title,
+            description: task.description || '',
+            course: {
+              id: task.course_id,
+              name: task.courses?.name || 'Unknown Course',
+              code: task.courses?.code || '',
+              color: task.courses?.color || '#6366F1'
+            },
+            dueDate: task.due_date,
+            dueText: task.due_text || '',
+            priority: task.priority || 'medium',
+            estimatedTime: task.estimated_time || 30,
+            completed: task.completed || false
+          })));
+        }
+
+        // Fetch analytics
+        const { data: analyticsData } = await supabase
+          .from('analytics')
+          .select('*')
+          .eq('user_id', user?.id)
+          .single();
+          
+        if (analyticsData) {
+          setStats({
+            weeklyData: analyticsData.weekly_data || stats.weeklyData,
+            totalTasks: analyticsData.total_tasks || 0,
+            completedTasks: analyticsData.completed_tasks || 0,
+            streak: analyticsData.streak || 0
+          });
+        }
+
       } catch (error) {
-        console.error("Error fetching analytics:", error);
+        console.error("Error fetching dashboard data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    
-    fetchAnalytics();
-  }, []);
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-5">
-        <DashboardGreeting userName="Alex" taskCount={tasks.length} />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="relative overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Weekly Study Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studyStats.weeklyHours} hours</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                +2.5 hours from last week
-              </p>
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-            </CardContent>
-          </Card>
-          
-          <Card className="relative overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Tasks
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studyStats.completedTasks}/{studyStats.totalTasks}</div>
-              <TaskProgress value={taskProgress} />
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-            </CardContent>
-          </Card>
-          
-          <Card className="relative overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Current Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studyStats.streak} days</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Keep it up!
-              </p>
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-            </CardContent>
-          </Card>
-          
-          <Card className="relative overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Study Time
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{studyStats.totalHours} hours</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Since you started tracking
-              </p>
-              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-            </CardContent>
-          </Card>
-        </div>
-        
-        <DashboardContent 
-          courses={courses} 
-          tasks={tasks} 
-          weeklyData={studyStats.weeklyData}
-          courseDistribution={studyStats.courseDistribution}
-          totalTasks={studyStats.totalTasks}
-          completedTasks={studyStats.completedTasks}
-          streak={studyStats.streak}
-        />
+
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const handleTaskToggle = async (task) => {
+    try {
+      // Update task completion status
+      const { error } = await supabase
+        .from('tasks')
+        .update({ completed: !task.completed })
+        .eq('id', task.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setTasks(tasks.map(t => 
+        t.id === task.id ? { ...t, completed: !t.completed } : t
+      ));
+      
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+  };
+
+  const handleSessionComplete = async (sessionData) => {
+    try {
+      const { courseId, duration, timestamp } = sessionData;
+      
+      // Create new session record
+      await supabase.from('study_sessions').insert({
+        user_id: user?.id,
+        course_id: courseId,
+        title: 'Study Session',
+        date: timestamp.toISOString(),
+        duration: duration,
+        completed: true
+      });
+      
+      // Could also update analytics here
+      
+    } catch (error) {
+      console.error("Error recording study session:", error);
+    }
+  };
+
+  const handleGenerateDetailedPlan = (recommendation) => {
+    // Implementation for AI recommendation handling
+    console.log("Generating detailed plan based on:", recommendation);
+    // This would integrate with AI services in a full implementation
+  };
+
+  if (isLoading) {
+    return (
+      <div className="h-48 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  return (
+    <div>
+      <DashboardGreeting userName={userName} />
+      
+      {courses.length === 0 && tasks.length === 0 ? (
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Welcome to StudyFlow!</h2>
+          <p className="mb-4">
+            It looks like you're just getting started. Add your first course and tasks to begin tracking your academic progress.
+          </p>
+          <div className="flex gap-4">
+            <a href="/courses" className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+              Add Courses
+            </a>
+            <a href="/tasks" className="inline-flex items-center px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90">
+              Add Tasks
+            </a>
+          </div>
+        </Card>
+      ) : (
+        <DashboardContent
+          courses={courses}
+          tasks={tasks}
+          stats={stats}
+          onTaskToggle={handleTaskToggle}
+          onSessionComplete={handleSessionComplete}
+          onGenerateDetailedPlan={handleGenerateDetailedPlan}
+        />
+      )}
     </div>
   );
 };

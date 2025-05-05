@@ -1,38 +1,25 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { v4 as uuidv4 } from 'uuid';
 
 // Types
 export interface StudySession {
   id: string;
   title: string;
-  date: string | Date;
+  date: string;
   course_id: string;
-  courseId?: string;
   course?: {
     id: string;
     name: string;
     code: string;
     color: string;
   };
-  courseColor?: string;
   duration: number; // in minutes
   description?: string;
   completed: boolean;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface SessionFormData {
-  id: string;
-  courseId: string;
-  title: string;
-  date: string;
-  startTime: string;
-  duration: number;
-  notes?: string;
-  completed: boolean;
 }
 
 export interface SessionFilters {
@@ -43,101 +30,6 @@ export interface SessionFilters {
   };
   completed?: boolean;
 }
-
-// Create a non-hook version of sessionService that doesn't rely on Auth context
-export const createSessionService = () => {
-  // Function to get session by ID (for demo/static purposes)
-  const getSessionById = async (sessionId: string) => {
-    try {
-      // This is a placeholder implementation without authentication
-      // In a real app, this would use Supabase
-      return {
-        id: sessionId,
-        courseId: "course-1",
-        title: "Study Session",
-        date: new Date().toISOString(),
-        startTime: "10:00",
-        duration: 60,
-        notes: "",
-        completed: true
-      };
-    } catch (error) {
-      console.error('Error fetching session:', error);
-      throw new Error('Failed to load session');
-    }
-  };
-  
-  // Function to add a new session
-  const addSession = async (formData: SessionFormData, courseColor: string) => {
-    try {
-      // Generate a random ID for now
-      const sessionId = `session-${uuidv4()}`;
-      
-      // Create a new session object
-      const newSession: StudySession = {
-        id: sessionId,
-        title: formData.title,
-        date: new Date(formData.date),
-        course_id: formData.courseId,
-        courseId: formData.courseId,
-        courseColor: courseColor,
-        duration: formData.duration,
-        description: formData.notes,
-        completed: formData.completed
-      };
-      
-      // In a real app, this would save to Supabase
-      
-      return newSession;
-    } catch (error) {
-      console.error('Error creating session:', error);
-      throw new Error('Failed to create session');
-    }
-  };
-  
-  // Function to update an existing session
-  const updateSession = async (formData: SessionFormData, courseColor: string) => {
-    try {
-      // Update the session
-      const updatedSession: StudySession = {
-        id: formData.id,
-        title: formData.title,
-        date: new Date(formData.date),
-        course_id: formData.courseId,
-        courseId: formData.courseId,
-        courseColor: courseColor,
-        duration: formData.duration,
-        description: formData.notes,
-        completed: formData.completed
-      };
-      
-      // In a real app, this would update in Supabase
-      
-      return updatedSession;
-    } catch (error) {
-      console.error('Error updating session:', error);
-      throw new Error('Failed to update session');
-    }
-  };
-  
-  // Function to delete a session
-  const deleteSession = (sessionId: string) => {
-    try {
-      // In a real app, this would delete from Supabase
-      return true;
-    } catch (error) {
-      console.error('Error deleting session:', error);
-      throw new Error('Failed to delete session');
-    }
-  };
-
-  return {
-    getSessionById,
-    addSession,
-    updateSession,
-    deleteSession
-  };
-};
 
 // Hooks
 export const useSessionService = () => {

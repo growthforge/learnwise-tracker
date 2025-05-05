@@ -5,7 +5,7 @@ import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
 import { StudySession, SessionFormData } from "@/features/calendar/types";
 import SessionForm from "@/features/calendar/SessionForm";
-import { sessionService } from "@/services/index";
+import { sessionService } from "@/services/sessionService";
 import { toast } from "sonner";
 
 interface ExtendedTask extends Task {
@@ -88,7 +88,7 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
         tasks={tasks} 
         showFilters={true}
         onAddSession={handleOpenAddForm}
-        onEditSession={handleOpenEditForm}
+        onEditSession={handleOpenEditForm} // We need to update AcademicCalendar to accept this prop
         onDeleteSession={handleDeleteSession}
       />
       
