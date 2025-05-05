@@ -19,6 +19,10 @@ import {
   Settings,
 } from "lucide-react";
 
+interface SidebarProps {
+  collapsed?: boolean;
+}
+
 const links = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
   { path: "/courses", label: "Courses", icon: <GraduationCap size={18} /> },
@@ -29,7 +33,7 @@ const links = [
   { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
 ];
 
-const Sidebar = () => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const { pathname } = useLocation();
   const { close } = useMobileMenu();
   const { signOut } = useAuth();
@@ -39,11 +43,11 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="relative flex w-full flex-col border-r bg-card pb-6">
+    <aside className="relative flex w-full flex-col border-r bg-card pb-6 h-full">
       <div className="flex h-14 items-center px-4 border-b">
         <NavLink to="/dashboard" className="flex items-center gap-2 font-semibold">
           <BookText className="h-5 w-5 text-primary" />
-          <span>StudyFlow</span>
+          {!collapsed && <span>StudyFlow</span>}
         </NavLink>
       </div>
 
@@ -62,7 +66,7 @@ const Sidebar = () => {
               }
             >
               {link.icon}
-              {link.label}
+              {!collapsed && link.label}
             </NavLink>
           ))}
         </nav>
@@ -73,11 +77,14 @@ const Sidebar = () => {
       <div className="px-2">
         <Button
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-muted-foreground"
+          className={cn(
+            "w-full justify-start text-sm font-medium text-muted-foreground",
+            collapsed && "justify-center px-0"
+          )}
           onClick={handleSignOut}
         >
-          <LogOut className="mr-3 h-4 w-4" />
-          Sign Out
+          <LogOut className={cn("h-4 w-4", collapsed ? "mx-0" : "mr-3")} />
+          {!collapsed && "Sign Out"}
         </Button>
       </div>
     </aside>

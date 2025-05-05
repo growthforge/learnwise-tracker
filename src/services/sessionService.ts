@@ -1,281 +1,215 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { StudySession, SessionFormData } from "@/features/calendar/types";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
-class SessionService {
-  // Convert SessionFormData to StudySession for internal storage
-  private convertFormDataToSession(formData: SessionFormData, courseColor: string): StudySession {
-    const dateObj = new Date(formData.date);
-    const [hours, minutes] = formData.startTime.split(':').map(Number);
-    
-    dateObj.setHours(hours, minutes, 0, 0);
-    
-    return {
-      id: formData.id,
-      title: formData.title || 'Study Session',
-      date: dateObj,
-      courseId: formData.courseId,
-      courseColor: courseColor,
-      description: formData.notes,
-      duration: formData.duration,
-      completed: formData.completed
-    };
-  }
-  
-  // Convert StudySession to SessionFormData for form use
-  private convertSessionToFormData(session: StudySession): SessionFormData {
-    const date = new Date(session.date);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    
-    return {
-      id: session.id,
-      courseId: session.courseId,
-      title: session.title,
-      date: new Date(date.setHours(0, 0, 0, 0)).toISOString(),
-      startTime: `${hours}:${minutes}`,
-      duration: session.duration,
-      completed: session.completed || false,
-      notes: session.description
-    };
-  }
-
-  // Get all study sessions
-  async getAllSessions(): Promise<StudySession[]> {
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `);
-    
-    if (error) {
-      console.error('Error fetching sessions:', error);
-      return [];
-    }
-    
-    return data.map(session => ({
-      id: session.id,
-      title: session.title,
-      date: new Date(session.date),
-      courseId: session.course_id,
-      courseColor: session.courses.color,
-      description: session.description,
-      duration: session.duration,
-      completed: session.completed
-    }));
-  }
-
-  // Get a session by ID
-  async getSessionById(id: string): Promise<SessionFormData | null> {
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `)
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching session:', error);
-      return null;
-    }
-    
-    const session: StudySession = {
-      id: data.id,
-      title: data.title,
-      date: new Date(data.date),
-      courseId: data.course_id,
-      courseColor: data.courses.color,
-      description: data.description,
-      duration: data.duration,
-      completed: data.completed
-    };
-    
-    return this.convertSessionToFormData(session);
-  }
-
-  // Add a new study session
-  async addSession(formData: SessionFormData, courseColor: string): Promise<StudySession> {
-    const session = this.convertFormDataToSession(formData, courseColor);
-    const dateISOString = session.date.toISOString();
-    
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .insert({
-        title: session.title,
-        date: dateISOString,
-        course_id: session.courseId,
-        duration: session.duration,
-        description: session.description,
-        completed: session.completed
-      })
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `)
-      .single();
-    
-    if (error) {
-      console.error('Error adding session:', error);
-      throw error;
-    }
-    
-    return {
-      id: data.id,
-      title: data.title,
-      date: new Date(data.date),
-      courseId: data.course_id,
-      courseColor: data.courses.color,
-      description: data.description,
-      duration: data.duration,
-      completed: data.completed
-    };
-  }
-
-  // Update an existing study session
-  async updateSession(formData: SessionFormData, courseColor: string): Promise<StudySession> {
-    const session = this.convertFormDataToSession(formData, courseColor);
-    const dateISOString = session.date.toISOString();
-    
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .update({
-        title: session.title,
-        date: dateISOString,
-        course_id: session.courseId,
-        duration: session.duration,
-        description: session.description,
-        completed: session.completed
-      })
-      .eq('id', session.id)
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `)
-      .single();
-    
-    if (error) {
-      console.error('Error updating session:', error);
-      throw error;
-    }
-    
-    return {
-      id: data.id,
-      title: data.title,
-      date: new Date(data.date),
-      courseId: data.course_id,
-      courseColor: data.courses.color,
-      description: data.description,
-      duration: data.duration,
-      completed: data.completed
-    };
-  }
-
-  // Delete a study session
-  async deleteSession(sessionId: string): Promise<void> {
-    const { error } = await supabase
-      .from('study_sessions')
-      .delete()
-      .eq('id', sessionId);
-    
-    if (error) {
-      console.error('Error deleting session:', error);
-      throw error;
-    }
-  }
-
-  // Get sessions by course
-  async getSessionsByCourse(courseId: string): Promise<StudySession[]> {
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `)
-      .eq('course_id', courseId);
-    
-    if (error) {
-      console.error('Error fetching sessions by course:', error);
-      return [];
-    }
-    
-    return data.map(session => ({
-      id: session.id,
-      title: session.title,
-      date: new Date(session.date),
-      courseId: session.course_id,
-      courseColor: session.courses.color,
-      description: session.description,
-      duration: session.duration,
-      completed: session.completed
-    }));
-  }
-
-  // Get sessions by date range
-  async getSessionsByDateRange(startDate: Date, endDate: Date): Promise<StudySession[]> {
-    const { data, error } = await supabase
-      .from('study_sessions')
-      .select(`
-        id,
-        title,
-        date,
-        course_id,
-        duration,
-        description,
-        completed,
-        courses:course_id (color)
-      `)
-      .gte('date', startDate.toISOString())
-      .lte('date', endDate.toISOString());
-    
-    if (error) {
-      console.error('Error fetching sessions by date range:', error);
-      return [];
-    }
-    
-    return data.map(session => ({
-      id: session.id,
-      title: session.title,
-      date: new Date(session.date),
-      courseId: session.course_id,
-      courseColor: session.courses.color,
-      description: session.description,
-      duration: session.duration,
-      completed: session.completed
-    }));
-  }
+// Types
+export interface StudySession {
+  id: string;
+  title: string;
+  date: string;
+  course_id: string;
+  course?: {
+    id: string;
+    name: string;
+    code: string;
+    color: string;
+  };
+  duration: number; // in minutes
+  description?: string;
+  completed: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export const sessionService = new SessionService();
+export interface SessionFilters {
+  course_id?: string;
+  dateRange?: {
+    from: Date;
+    to: Date;
+  };
+  completed?: boolean;
+}
+
+// Hooks
+export const useSessionService = () => {
+  const { user } = useAuth();
+
+  const fetchSessions = async (filters?: SessionFilters): Promise<StudySession[]> => {
+    try {
+      let query = supabase
+        .from('study_sessions')
+        .select(`
+          *,
+          courses:course_id(id, name, code, color)
+        `)
+        .eq('user_id', user?.id);
+
+      // Apply filters if provided
+      if (filters) {
+        if (filters.course_id) {
+          query = query.eq('course_id', filters.course_id);
+        }
+
+        if (filters.dateRange) {
+          query = query
+            .gte('date', filters.dateRange.from.toISOString())
+            .lte('date', filters.dateRange.to.toISOString());
+        }
+
+        if (filters.completed !== undefined) {
+          query = query.eq('completed', filters.completed);
+        }
+      }
+
+      const { data, error } = await query.order('date', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data.map(session => ({
+        id: session.id,
+        title: session.title,
+        date: session.date,
+        course_id: session.course_id,
+        course: session.courses ? {
+          id: session.courses.id,
+          name: session.courses.name,
+          code: session.courses.code,
+          color: session.courses.color,
+        } : undefined,
+        duration: session.duration,
+        description: session.description || '',
+        completed: session.completed,
+        created_at: session.created_at,
+        updated_at: session.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      toast.error('Failed to load study sessions');
+      return [];
+    }
+  };
+
+  const fetchSessionById = async (id: string): Promise<StudySession | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .select(`
+          *,
+          courses:course_id(id, name, code, color)
+        `)
+        .eq('id', id)
+        .eq('user_id', user?.id)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return {
+        id: data.id,
+        title: data.title,
+        date: data.date,
+        course_id: data.course_id,
+        course: data.courses ? {
+          id: data.courses.id,
+          name: data.courses.name,
+          code: data.courses.code,
+          color: data.courses.color,
+        } : undefined,
+        duration: data.duration,
+        description: data.description || '',
+        completed: data.completed,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+      };
+    } catch (error) {
+      console.error('Error fetching session:', error);
+      toast.error('Failed to load study session');
+      return null;
+    }
+  };
+
+  const createSession = async (sessionData: {
+    title: string;
+    date: string;
+    course_id: string;
+    duration: number;
+    description: string;
+    completed: boolean;
+  }): Promise<StudySession | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('study_sessions')
+        .insert({
+          ...sessionData,
+          user_id: user?.id
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Study session created successfully');
+      return data;
+    } catch (error) {
+      console.error('Error creating session:', error);
+      toast.error('Failed to create study session');
+      return null;
+    }
+  };
+
+  const updateSession = async (id: string, sessionData: Partial<StudySession>): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('study_sessions')
+        .update(sessionData)
+        .eq('id', id)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Study session updated successfully');
+      return true;
+    } catch (error) {
+      console.error('Error updating session:', error);
+      toast.error('Failed to update study session');
+      return false;
+    }
+  };
+
+  const deleteSession = async (id: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('study_sessions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Study session deleted successfully');
+      return true;
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      toast.error('Failed to delete study session');
+      return false;
+    }
+  };
+
+  return {
+    fetchSessions,
+    fetchSessionById,
+    createSession,
+    updateSession,
+    deleteSession,
+  };
+};

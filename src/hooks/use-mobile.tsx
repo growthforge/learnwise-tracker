@@ -35,3 +35,27 @@ export const useMediaQuery = (query: string) => {
 
   return !!matches
 }
+
+// Add the useMobileMenu hook
+export const useMobileMenu = () => {
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const toggle = React.useCallback(() => {
+    setIsOpen(prev => !prev)
+  }, [])
+
+  const close = React.useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const open = React.useCallback(() => {
+    setIsOpen(true)
+  }, [])
+
+  return {
+    isOpen,
+    toggle,
+    close,
+    open
+  }
+}

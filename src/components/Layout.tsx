@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                   ${sidebarCollapsed ? 'w-[80px]' : 'w-64'}`}
       >
-        <Sidebar collapsed={sidebarCollapsed} />
+        <Sidebar />
         
         {/* Collapse button (desktop only) */}
         <div className="absolute top-4 -right-4 hidden md:block">
