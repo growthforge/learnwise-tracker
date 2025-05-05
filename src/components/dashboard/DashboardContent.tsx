@@ -2,7 +2,6 @@
 import React from "react";
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
-import { StudyStats } from "@/components/StatsOverview";
 import AIStudyRecommendations from "@/features/ai/AIStudyRecommendations";
 import TaskList from "@/components/TaskList";
 import CourseCard from "@/components/CourseCard";
@@ -12,19 +11,27 @@ import TaskProgress from "./TaskProgress";
 interface DashboardContentProps {
   courses: Course[];
   tasks: Task[];
-  stats: StudyStats;
-  onTaskToggle: (task: Task) => void;
-  onSessionComplete: (sessionData: { courseId: string; duration: number; timestamp: Date }) => void;
-  onGenerateDetailedPlan: (recommendation: any) => void;
+  weeklyData: { day: string; hours: number }[];
+  courseDistribution: { id: string; name: string; hours: number; color: string }[];
+  totalTasks: number;
+  completedTasks: number;
+  streak: number;
+  onTaskToggle?: (task: Task) => void;
+  onSessionComplete?: (sessionData: { courseId: string; duration: number; timestamp: Date }) => void;
+  onGenerateDetailedPlan?: (recommendation: any) => void;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({
   courses,
   tasks,
-  stats,
-  onTaskToggle,
-  onSessionComplete,
-  onGenerateDetailedPlan,
+  weeklyData,
+  courseDistribution,
+  totalTasks,
+  completedTasks,
+  streak,
+  onTaskToggle = () => {},
+  onSessionComplete = () => {},
+  onGenerateDetailedPlan = () => {},
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -32,7 +39,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         <AIStudyRecommendations
           courses={courses}
           tasks={tasks}
-          studyHours={stats.weeklyData.map(d => d.hours)}
+          studyHours={weeklyData.map(d => d.hours)}
           onGenerateDetailedPlan={onGenerateDetailedPlan}
           className="hover-card glass-card"
         />
@@ -59,9 +66,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         />
         
         <TaskProgress 
-          completedTasks={stats.completedTasks} 
-          totalTasks={stats.totalTasks} 
-          streak={stats.streak} 
+          completedTasks={completedTasks} 
+          totalTasks={totalTasks} 
+          streak={streak} 
         />
       </div>
     </div>

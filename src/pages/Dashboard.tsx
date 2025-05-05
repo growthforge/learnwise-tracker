@@ -127,61 +127,65 @@ const Dashboard: React.FC = () => {
                 +2.5 hours from last week
               </p>
               <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-            </Card>
-            
-            <Card className="relative overflow-hidden">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Tasks
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{studyStats.completedTasks}/{studyStats.totalTasks}</div>
-                <TaskProgress value={taskProgress} />
-                <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-              </Card>
-              
-              <Card className="relative overflow-hidden">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Current Streak
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{studyStats.streak} days</div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Keep it up!
-                  </p>
-                  <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-                </Card>
-                
-                <Card className="relative overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      Total Study Time
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{studyStats.totalHours} hours</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Since you started tracking
-                    </p>
-                    <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
-                  </Card>
-                </div>
-                
-                <DashboardContent 
-                  courses={courses} 
-                  tasks={tasks} 
-                  weeklyData={studyStats.weeklyData}
-                  courseDistribution={studyStats.courseDistribution}
-                  totalTasks={studyStats.totalTasks}
-                  completedTasks={studyStats.completedTasks}
-                  streak={studyStats.streak}
-                />
-              </div>
-            </div>
-          );
-        };
+            </CardContent>
+          </Card>
+          
+          <Card className="relative overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Tasks
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{studyStats.completedTasks}/{studyStats.totalTasks}</div>
+              <TaskProgress value={taskProgress} />
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
+            </CardContent>
+          </Card>
+          
+          <Card className="relative overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Current Streak
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{studyStats.streak} days</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Keep it up!
+              </p>
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
+            </CardContent>
+          </Card>
+          
+          <Card className="relative overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Study Time
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{studyStats.totalHours} hours</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Since you started tracking
+              </p>
+              <div className="absolute bottom-0 right-0 w-16 h-16 bg-primary/10 rounded-tl-full" />
+            </CardContent>
+          </Card>
+        </div>
         
+        <DashboardContent 
+          courses={courses} 
+          tasks={tasks} 
+          weeklyData={studyStats.weeklyData}
+          courseDistribution={studyStats.courseDistribution}
+          totalTasks={studyStats.totalTasks}
+          completedTasks={studyStats.completedTasks}
+          streak={studyStats.streak}
+        />
+      </div>
+    </div>
+  );
+};
+
 export default Dashboard;
