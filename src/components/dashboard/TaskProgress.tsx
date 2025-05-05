@@ -7,13 +7,22 @@ interface TaskProgressProps {
   completedTasks: number;
   totalTasks: number;
   streak: number;
+  value?: number; // Add value prop for direct progress display
 }
 
 const TaskProgress: React.FC<TaskProgressProps> = ({ 
   completedTasks, 
   totalTasks, 
-  streak 
+  streak,
+  value // Add value prop
 }) => {
+  // Calculate progress percentage if value is not provided
+  const progressPercentage = value !== undefined 
+    ? value 
+    : totalTasks > 0 
+      ? (completedTasks / totalTasks) * 100
+      : 0;
+
   return (
     <Card className="hover-card">
       <CardContent className="p-6">
@@ -33,7 +42,7 @@ const TaskProgress: React.FC<TaskProgressProps> = ({
             <div className="w-full bg-secondary rounded-full h-2.5">
               <div 
                 className="bg-green-500 h-2.5 rounded-full" 
-                style={{width: `${(completedTasks / totalTasks) * 100}%`}}
+                style={{width: `${progressPercentage}%`}}
               ></div>
             </div>
           </div>

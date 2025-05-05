@@ -1,182 +1,171 @@
 
-import React from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, BookText, Calendar, CheckSquare, BarChart3 } from 'lucide-react';
 
-const Index: React.FC = () => {
-  const { user } = useAuth();
-
+const Index = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <header className="container mx-auto flex h-16 items-center justify-between px-4">
-        <div className="flex items-center">
+    <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
+      {/* Header */}
+      <header className="container mx-auto px-4 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookText className="h-6 w-6 text-primary" />
           <span className="font-bold text-xl">StudyFlow</span>
         </div>
-        <nav className="flex items-center gap-4">
-          {user ? (
-            <Link to="/dashboard">
-              <Button>Dashboard</Button>
-            </Link>
-          ) : (
-            <Link to="/auth">
-              <Button>Sign In</Button>
-            </Link>
-          )}
-        </nav>
+        <div>
+          <Link to="/auth">
+            <Button variant="outline" className="mr-2">Login</Button>
+          </Link>
+          <Link to="/auth?tab=signup">
+            <Button>Sign Up</Button>
+          </Link>
+        </div>
       </header>
-      <main className="flex-1">
-        <section className="py-12 md:py-24 lg:py-32">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
-              <div className="space-y-4">
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  The Intelligent Academic Planner
-                </h1>
-                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  Organize your courses, manage assignments, and optimize your study time with AI-powered insights.
-                </p>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  {user ? (
-                    <Link to="/dashboard">
-                      <Button size="lg">Go to Dashboard</Button>
-                    </Link>
-                  ) : (
-                    <Link to="/auth">
-                      <Button size="lg">Get Started</Button>
-                    </Link>
-                  )}
-                  <Button variant="outline" size="lg">
-                    Learn More
-                  </Button>
+
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-20 flex flex-col lg:flex-row items-center">
+        <div className="lg:w-1/2 mb-10 lg:mb-0">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-6">
+            Master Your Academic Journey
+          </h1>
+          <p className="text-xl text-muted-foreground mb-8 max-w-lg">
+            Organize your courses, track study time, and boost productivity with StudyFlow's powerful learning tools.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/auth?tab=signup">
+              <Button size="lg" className="gap-2">
+                Get Started Free
+                <ArrowRight size={16} />
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button variant="outline" size="lg">
+                Learn More
+              </Button>
+            </Link>
+          </div>
+        </div>
+        
+        <div className="lg:w-1/2 flex justify-center lg:justify-end">
+          <div className="relative w-full max-w-lg">
+            <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+            <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+            <div className="relative">
+              <div className="bg-white/90 backdrop-blur-sm border rounded-2xl shadow-xl p-6 dark:bg-black/80">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-              </div>
-              <div className="flex justify-center">
-                <img
-                  src="/placeholder.svg"
-                  alt="StudyFlow Dashboard"
-                  width={600}
-                  height={400}
-                  className="aspect-video rounded-xl object-cover"
-                />
+                <div className="space-y-4">
+                  <div className="h-10 bg-primary/10 rounded flex items-center px-4 text-sm">
+                    <BookText size={18} className="mr-2 text-primary" /> 
+                    <span>Study Dashboard</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-24 bg-secondary/50 rounded p-3">
+                      <div className="text-xs text-muted-foreground">Tasks</div>
+                      <div className="mt-2 flex items-center">
+                        <CheckSquare size={16} className="mr-2" />
+                        <span className="text-sm">5 pending</span>
+                      </div>
+                    </div>
+                    <div className="h-24 bg-secondary/50 rounded p-3">
+                      <div className="text-xs text-muted-foreground">Schedule</div>
+                      <div className="mt-2 flex items-center">
+                        <Calendar size={16} className="mr-2" />
+                        <span className="text-sm">2 today</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-32 bg-secondary/50 rounded p-3">
+                    <div className="flex justify-between mb-2">
+                      <div className="text-xs text-muted-foreground">Weekly Progress</div>
+                      <BarChart3 size={14} />
+                    </div>
+                    <div className="flex items-end h-16 gap-1 pt-2">
+                      {[30, 45, 75, 50, 60, 40, 65].map((h, i) => (
+                        <div
+                          key={i}
+                          className="bg-primary/80 rounded-t w-full"
+                          style={{ height: `${h}%` }}
+                        ></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-        <section className="py-12 md:py-24 lg:py-32 bg-muted">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                Features
-              </h2>
-              <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[700px] mx-auto">
-                Everything you need to excel in your academic journey
-              </p>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Why Choose StudyFlow</h2>
+        
+        <div className="grid md:grid-cols-3 gap-8">
+          <div className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+              <Calendar className="h-6 w-6 text-primary" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <GraduationCap className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Course Management</h3>
-                <p className="text-muted-foreground">
-                  Keep track of all your courses, deadlines, and class schedules in one place.
-                </p>
-              </div>
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <CheckSquare className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Task Tracking</h3>
-                <p className="text-muted-foreground">
-                  Manage assignments, readings, and projects with priority-based task lists.
-                </p>
-              </div>
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Study Sessions</h3>
-                <p className="text-muted-foreground">
-                  Track focused study time and build consistent learning habits.
-                </p>
-              </div>
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <Calendar className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Calendar Integration</h3>
-                <p className="text-muted-foreground">
-                  View all your academic commitments in a comprehensive calendar.
-                </p>
-              </div>
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <BarChart3 className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Analytics</h3>
-                <p className="text-muted-foreground">
-                  Gain insights into your study habits and academic performance.
-                </p>
-              </div>
-              <div className="bg-card p-6 rounded-lg shadow">
-                <div className="bg-primary/10 p-3 rounded-full w-fit mb-4">
-                  <BrainCircuit className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">AI Recommendations</h3>
-                <p className="text-muted-foreground">
-                  Receive personalized study plans and optimization suggestions.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section className="py-12 md:py-24 lg:py-32">
-          <div className="container mx-auto px-4 md:px-6 text-center">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl mb-4">
-              Ready to Boost Your Academic Performance?
-            </h2>
-            <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed max-w-[700px] mx-auto mb-6">
-              Join thousands of students who are already optimizing their study time with StudyFlow.
+            <h3 className="text-xl font-semibold mb-2">Smart Scheduling</h3>
+            <p className="text-muted-foreground">
+              Plan your study sessions efficiently with our intelligent scheduling system that adapts to your learning patterns.
             </p>
-            {user ? (
-              <Link to="/dashboard">
-                <Button size="lg">Go to Dashboard</Button>
-              </Link>
-            ) : (
-              <Link to="/auth">
-                <Button size="lg">Get Started for Free</Button>
-              </Link>
-            )}
           </div>
-        </section>
-      </main>
-      <footer className="border-t py-6">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-center md:text-left">
-              <p className="text-sm text-muted-foreground">
-                © 2023 StudyFlow. All rights reserved.
-              </p>
+          
+          <div className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+              <CheckSquare className="h-6 w-6 text-primary" />
             </div>
-            <div className="flex gap-4">
-              <a href="#" className="text-sm text-muted-foreground hover:underline">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:underline">
-                Terms of Service
-              </a>
-              <a href="#" className="text-sm text-muted-foreground hover:underline">
-                Contact
-              </a>
+            <h3 className="text-xl font-semibold mb-2">Task Management</h3>
+            <p className="text-muted-foreground">
+              Never miss an assignment deadline with our comprehensive task management and priority system.
+            </p>
+          </div>
+          
+          <div className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+              <BarChart3 className="h-6 w-6 text-primary" />
             </div>
+            <h3 className="text-xl font-semibold mb-2">Progress Analytics</h3>
+            <p className="text-muted-foreground">
+              Track your study patterns and academic progress with detailed analytics and insights.
+            </p>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA */}
+      <section className="bg-primary/5 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to transform your academic journey?</h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of students who have boosted their productivity and achieved better results with StudyFlow.
+          </p>
+          <Link to="/auth?tab=signup">
+            <Button size="lg">Get Started Now</Button>
+          </Link>
+        </div>
+      </section>
+      
+      {/* Footer */}
+      <footer className="container mx-auto px-4 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-center border-t pt-8">
+          <div className="flex items-center gap-2 mb-4 md:mb-0">
+            <BookText className="h-5 w-5 text-primary" />
+            <span className="font-semibold">StudyFlow</span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            © 2023 StudyFlow. All rights reserved.
           </div>
         </div>
       </footer>
     </div>
   );
 };
-
-import { BrainCircuit, GraduationCap, CheckSquare, Clock, Calendar, BarChart3 } from "lucide-react";
 
 export default Index;

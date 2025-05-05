@@ -29,10 +29,11 @@ export interface ExtendedTask extends Task {
   dueDate?: string | Date;
 }
 
+// Update to match the service definition (title is required)
 export interface SessionFormData {
   id: string;
-  courseId: string; // This is required
-  title?: string;
+  courseId: string;
+  title: string; // Now required
   date: string; // ISO string
   startTime: string; // HH:MM format
   duration: number; // in minutes

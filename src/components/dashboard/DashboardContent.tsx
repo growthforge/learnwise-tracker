@@ -2,12 +2,19 @@
 import React from "react";
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
-import { StudyStats } from "@/components/StatsOverview";
 import AIStudyRecommendations from "@/features/ai/AIStudyRecommendations";
 import TaskList from "@/components/TaskList";
 import CourseCard from "@/components/CourseCard";
 import StudySession from "@/components/StudySession";
 import TaskProgress from "./TaskProgress";
+
+interface StudyStats {
+  completedTasks: number;
+  totalTasks: number;
+  streak: number;
+  weeklyData: { day: string; hours: number }[];
+  courseDistribution: { id: string; name: string; hours: number; color: string }[];
+}
 
 interface DashboardContentProps {
   courses: Course[];

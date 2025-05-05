@@ -59,11 +59,15 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
       if (formData.id.includes("session-") && !formData.id.includes("new")) {
         // Update existing session
         const updatedSession = await sessionService.updateSession(formData, course.color);
-        onUpdateSession?.(updatedSession);
+        if (onUpdateSession) {
+          onUpdateSession(updatedSession);
+        }
       } else {
         // Add new session
         const newSession = await sessionService.addSession(formData, course.color);
-        onAddSession?.(newSession);
+        if (onAddSession) {
+          onAddSession(newSession);
+        }
       }
     } catch (error) {
       toast.error("Failed to save session");
@@ -74,7 +78,9 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
   const handleDeleteSession = (sessionId: string) => {
     try {
       sessionService.deleteSession(sessionId);
-      onDeleteSession?.(sessionId);
+      if (onDeleteSession) {
+        onDeleteSession(sessionId);
+      }
     } catch (error) {
       toast.error("Failed to delete session");
       console.error(error);
@@ -88,7 +94,7 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
         tasks={tasks} 
         showFilters={true}
         onAddSession={handleOpenAddForm}
-        onEditSession={handleOpenEditForm} // We need to update AcademicCalendar to accept this prop
+        onEditSession={handleOpenEditForm}
         onDeleteSession={handleDeleteSession}
       />
       

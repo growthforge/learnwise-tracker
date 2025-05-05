@@ -6,24 +6,32 @@ import AnimatedTransition from "./AnimatedTransition";
 import { ChevronLeft, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "@/hooks/use-mobile";
+import { useMobileMenu } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { isOpen: sidebarOpen, open: openSidebar, close: closeSidebar, toggle: toggleSidebar } = useMobileMenu();
   const isMobile = useMediaQuery("(max-width: 768px)");
   
   // Close sidebar on mobile by default
   useEffect(() => {
     if (isMobile) {
-      setSidebarOpen(false);
+      closeSidebar();
     } else {
-      setSidebarOpen(true);
+      openSidebar();
     }
-  }, [isMobile]);
+  }, [isMobile, closeSidebar, openSidebar]);
+
+  // Close sidebar when clicking on overlay or navigating on mobile
+  const handleOverlayClick = () => {
+    if (isMobile) {
+      closeSidebar();
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-background overflow-hidden">
@@ -32,7 +40,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Button 
           size="icon" 
           variant="outline" 
-          onClick={() => setSidebarOpen(!sidebarOpen)} 
+          onClick={toggleSidebar} 
           className="h-10 w-10 rounded-full bg-background/80 backdrop-blur-sm"
         >
           <Menu className="h-5 w-5" />
@@ -78,7 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       {sidebarOpen && isMobile && (
         <div 
           className="fixed inset-0 bg-black/20 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={handleOverlayClick}
         />
       )}
     </div>

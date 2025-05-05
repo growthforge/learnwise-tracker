@@ -17,7 +17,12 @@ import {
   Home,
   LogOut,
   Settings,
+  User,
 } from "lucide-react";
+
+interface SidebarProps {
+  collapsed?: boolean;
+}
 
 const links = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
@@ -29,21 +34,23 @@ const links = [
   { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
 ];
 
-const Sidebar = () => {
+const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   const { pathname } = useLocation();
   const { close } = useMobileMenu();
-  const { signOut } = useAuth();
+  const { signOut, userProfile } = useAuth();
 
   const handleSignOut = () => {
     signOut();
   };
 
   return (
-    <aside className="relative flex w-full flex-col border-r bg-card pb-6">
+    <aside className="relative flex w-full flex-col border-r bg-card pb-6 h-full">
       <div className="flex h-14 items-center px-4 border-b">
         <NavLink to="/dashboard" className="flex items-center gap-2 font-semibold">
           <BookText className="h-5 w-5 text-primary" />
-          <span>StudyFlow</span>
+          <span className={cn("transition-opacity duration-200", collapsed ? "opacity-0" : "opacity-100")}>
+            StudyFlow
+          </span>
         </NavLink>
       </div>
 
@@ -56,13 +63,14 @@ const Sidebar = () => {
               onClick={close}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent",
-                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent transition-all",
+                  isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground",
+                  collapsed && "justify-center px-2"
                 )
               }
             >
               {link.icon}
-              {link.label}
+              {!collapsed && <span>{link.label}</span>}
             </NavLink>
           ))}
         </nav>
@@ -70,14 +78,32 @@ const Sidebar = () => {
 
       <Separator className="my-4" />
 
+      {!collapsed && userProfile && (
+        <div className="px-4 mb-4">
+          <div className="flex items-center gap-3 rounded-md bg-accent/50 p-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 text-primary">
+              <User size={16} />
+            </div>
+            <div className="text-sm overflow-hidden">
+              <p className="font-medium truncate">
+                {userProfile.firstName} {userProfile.lastName}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="px-2">
         <Button
           variant="ghost"
-          className="w-full justify-start text-sm font-medium text-muted-foreground"
+          className={cn(
+            "w-full text-sm font-medium text-muted-foreground",
+            collapsed ? "justify-center px-0" : "justify-start"
+          )}
           onClick={handleSignOut}
         >
-          <LogOut className="mr-3 h-4 w-4" />
-          Sign Out
+          <LogOut className={cn("h-4 w-4", collapsed ? "mx-0" : "mr-3")} />
+          {!collapsed && "Sign Out"}
         </Button>
       </div>
     </aside>
