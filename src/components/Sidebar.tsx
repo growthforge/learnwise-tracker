@@ -19,10 +19,6 @@ import {
   Settings,
 } from "lucide-react";
 
-interface SidebarProps {
-  collapsed?: boolean;
-}
-
 const links = [
   { path: "/dashboard", label: "Dashboard", icon: <Home size={18} /> },
   { path: "/courses", label: "Courses", icon: <GraduationCap size={18} /> },
@@ -33,7 +29,7 @@ const links = [
   { path: "/settings", label: "Settings", icon: <Settings size={18} /> },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
+const Sidebar = () => {
   const { pathname } = useLocation();
   const { close } = useMobileMenu();
   const { signOut } = useAuth();
@@ -43,11 +39,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
   };
 
   return (
-    <aside className="relative flex w-full flex-col border-r bg-card pb-6 h-full">
+    <aside className="relative flex w-full flex-col border-r bg-card pb-6">
       <div className="flex h-14 items-center px-4 border-b">
         <NavLink to="/dashboard" className="flex items-center gap-2 font-semibold">
           <BookText className="h-5 w-5 text-primary" />
-          {!collapsed && <span>StudyFlow</span>}
+          <span>StudyFlow</span>
         </NavLink>
       </div>
 
@@ -66,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
               }
             >
               {link.icon}
-              {!collapsed && link.label}
+              {link.label}
             </NavLink>
           ))}
         </nav>
@@ -77,14 +73,11 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed = false }) => {
       <div className="px-2">
         <Button
           variant="ghost"
-          className={cn(
-            "w-full justify-start text-sm font-medium text-muted-foreground",
-            collapsed && "justify-center px-0"
-          )}
+          className="w-full justify-start text-sm font-medium text-muted-foreground"
           onClick={handleSignOut}
         >
-          <LogOut className={cn("h-4 w-4", collapsed ? "mx-0" : "mr-3")} />
-          {!collapsed && "Sign Out"}
+          <LogOut className="mr-3 h-4 w-4" />
+          Sign Out
         </Button>
       </div>
     </aside>
