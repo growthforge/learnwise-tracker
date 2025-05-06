@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import AIScheduleSuggestions from "@/features/ai/AIScheduleSuggestions";
 import { v4 as uuidv4 } from "uuid";
 
-// Sample tasks for the calendar view
+// Sample tasks for the calendar view with added courseId property
 const sampleTasks: ExtendedTask[] = [
   {
     id: "task-1",

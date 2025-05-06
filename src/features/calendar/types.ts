@@ -25,6 +25,7 @@ export interface CalendarEvent {
   meta?: any;
 }
 
+// Update ExtendedTask to handle both Date objects and string dates
 export interface ExtendedTask extends Omit<Task, 'dueDate'> {
   dueDate?: Date | string;
 }

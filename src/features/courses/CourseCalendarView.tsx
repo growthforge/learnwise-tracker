@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AcademicCalendar from "@/features/calendar/AcademicCalendar";
 import { Course } from "@/components/CourseCard";
@@ -83,10 +82,10 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
     }
   };
 
-  // Convert tasks to ExtendedTask type
+  // Convert tasks to ExtendedTask type with proper interface compatibility
   const extendedTasks: ExtendedTask[] = tasks.map(task => ({
     ...task,
-    dueDate: task.dueDate
+    dueDate: task.dueDate || new Date()
   }));
 
   return (

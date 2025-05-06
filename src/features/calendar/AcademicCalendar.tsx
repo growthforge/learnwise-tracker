@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Filter, Plus } from "lucide-react";
@@ -24,7 +23,7 @@ import {
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
 import { toast } from "sonner";
-import { CalendarEvent, StudySession, SessionFormData } from "./types";
+import { CalendarEvent, StudySession, SessionFormData, ExtendedTask } from "./types";
 import { generateEvents, filterEvents } from "./utils";
 import { 
   CalendarSidebar,

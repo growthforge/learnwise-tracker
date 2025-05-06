@@ -1,4 +1,3 @@
-
 import { Task } from "@/components/TaskList";
 
 // Sample data
@@ -23,9 +22,11 @@ export const sampleTasks: Task[] = [
       color: "blue",
     },
     due: "Tomorrow at 11:59 PM",
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     completed: false,
     priority: "high",
     estimatedTime: 3,
+    description: "Implement and train a neural network model"
   },
   {
     id: "task-2",
@@ -38,6 +39,7 @@ export const sampleTasks: Task[] = [
       color: "amber",
     },
     due: "Friday at 6:00 PM",
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
     completed: false,
     priority: "medium",
     estimatedTime: 2,
@@ -53,9 +55,11 @@ export const sampleTasks: Task[] = [
       color: "purple",
     },
     due: "Next Monday",
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
     completed: false,
     priority: "high",
     estimatedTime: 4,
+    description: "Read about eigenvalues and eigenvectors"
   },
   {
     id: "task-4",

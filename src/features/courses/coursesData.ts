@@ -1,14 +1,7 @@
-
-import { Course } from "@/components/CourseCard";
-
-// Define a type for the nextClass property since it's not a standard Date
-interface CourseNextClass {
-  day: string;
-  time: string;
-}
+import { Course, CourseNextClass } from "@/components/CourseCard";
 
 // Define the extended Course type that includes the custom nextClass format
-interface SampleCourse extends Omit<Course, 'nextClass'> {
+export interface SampleCourse extends Course {
   nextClass?: CourseNextClass;
 }
 

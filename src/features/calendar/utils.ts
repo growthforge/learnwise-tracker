@@ -1,6 +1,6 @@
 
 import { CalendarEvent, StudySession, ExtendedTask } from "./types";
-import { Course } from "@/components/CourseCard";
+import { Course, CourseNextClass } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
 
 // Generate calendar events from courses, tasks, and sessions
@@ -26,19 +26,17 @@ export const generateEvents = (
         // If nextClass is already a Date object
         nextClassDate = new Date(course.nextClass);
       } else if (typeof course.nextClass === 'object' && 'day' in course.nextClass) {
-        // If nextClass is an object with 'day' property
-        // @ts-ignore - We know this is a valid object structure from coursesData
-        const dayOfWeek = dayMap[course.nextClass.day];
+        // If nextClass is a CourseNextClass object with 'day' property
+        const courseNextClass = course.nextClass as CourseNextClass;
+        const dayOfWeek = dayMap[courseNextClass.day];
         const currentDay = today.getDay();
         const daysUntilClass = (dayOfWeek - currentDay + 7) % 7;
         nextClassDate = new Date(today);
         nextClassDate.setDate(today.getDate() + daysUntilClass);
         
         // Set the class time
-        // @ts-ignore - We know this is a valid object structure from coursesData
-        if (course.nextClass.time) {
-          // @ts-ignore - We know this is a valid object structure from coursesData
-          const timeStr = course.nextClass.time;
+        if (courseNextClass.time) {
+          const timeStr = courseNextClass.time;
           const [hours, minutes] = timeStr.split(':').length > 1 
             ? timeStr.split(':')
             : timeStr.includes('AM') || timeStr.includes('PM')
@@ -90,7 +88,47 @@ export const generateEvents = (
   // Add task events
   tasks.forEach(task => {
     if (task.dueDate || task.due) {
-      const dueDate = task.dueDate ? new Date(task.dueDate) : new Date(task.due || '');
+      // Convert string dates to Date objects safely
+      let dueDate: Date;
+      
+      if (task.dueDate) {
+        if (task.dueDate instanceof Date) {
+          dueDate = task.dueDate;
+        } else {
+          // Try to parse the string date safely
+          try {
+            dueDate = new Date(task.dueDate);
+            
+            // Check if the date is valid
+            if (isNaN(dueDate.getTime())) {
+              // Use a fallback date
+              dueDate = new Date();
+              dueDate.setDate(dueDate.getDate() + 7); // Default to 1 week from now
+            }
+          } catch (error) {
+            // Use a fallback date
+            dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 7); // Default to 1 week from now
+          }
+        }
+      } else {
+        // Try to interpret the due text
+        const dueText = task.due || '';
+        
+        if (dueText.toLowerCase().includes('tomorrow')) {
+          dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + 1);
+        } else if (dueText.toLowerCase().includes('today')) {
+          dueDate = new Date();
+        } else if (dueText.toLowerCase().includes('next')) {
+          dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + 7);
+        } else {
+          // Default fallback
+          dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + 3);
+        }
+      }
       
       events.push({
         id: `task-${task.id}`,
@@ -98,7 +136,7 @@ export const generateEvents = (
         date: dueDate,
         type: task.completed ? 'completed' : 'task',
         courseId: task.courseId,
-        courseColor: task.course.color,
+        courseColor: task.course?.color || '',
         description: task.description || `Priority: ${task.priority}`,
         duration: task.estimatedTime ? task.estimatedTime * 60 : 30 // Convert hours to minutes
       });
@@ -107,10 +145,30 @@ export const generateEvents = (
   
   // Add study session events
   sessions.forEach(session => {
+    // Ensure session.date is a valid Date object
+    let sessionDate: Date;
+    
+    if (session.date instanceof Date) {
+      sessionDate = new Date(session.date);
+    } else {
+      try {
+        sessionDate = new Date(session.date);
+        
+        // Check if date is valid
+        if (isNaN(sessionDate.getTime())) {
+          // Use current date as fallback
+          sessionDate = new Date();
+        }
+      } catch (error) {
+        // Use current date as fallback
+        sessionDate = new Date();
+      }
+    }
+    
     events.push({
       id: `session-${session.id}`,
       title: session.title,
-      date: new Date(session.date),
+      date: sessionDate,
       type: 'session',
       courseId: session.courseId,
       courseColor: session.courseColor,
