@@ -45,7 +45,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
     if (initialTask) {
       setTitle(initialTask.title);
       setCourseId(initialTask.course.id);
-      setDueDate(initialTask.due);
+      setDueDate(initialTask.due || '');
       setPriority(initialTask.priority);
       setEstimatedTime(initialTask.estimatedTime?.toString() || '');
       setDescription(initialTask.description || '');
@@ -78,10 +78,11 @@ const TaskForm: React.FC<TaskFormProps> = ({
         code: selectedCourse.code,
         color: selectedCourse.color
       },
+      courseId: selectedCourse.id,
       due: dueDate,
       completed: initialTask?.completed || false,
       priority,
-      estimatedTime: estimatedTime ? parseFloat(estimatedTime) : undefined,
+      estimatedTime: estimatedTime ? parseFloat(estimatedTime) : 0,
       description
     };
     

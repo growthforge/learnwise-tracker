@@ -3,18 +3,14 @@ import React, { useState } from "react";
 import AcademicCalendar from "@/features/calendar/AcademicCalendar";
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
-import { StudySession, SessionFormData } from "@/features/calendar/types";
+import { StudySession, SessionFormData, ExtendedTask } from "@/features/calendar/types";
 import SessionForm from "@/features/calendar/SessionForm";
 import { sessionService } from "@/services/sessionService";
 import { toast } from "sonner";
 
-interface ExtendedTask extends Task {
-  dueDate?: string | Date;
-}
-
 interface CourseCalendarViewProps {
   courses: Course[];
-  tasks?: ExtendedTask[];
+  tasks?: Task[];
   onAddSession?: (session: StudySession) => void;
   onUpdateSession?: (session: StudySession) => void;
   onDeleteSession?: (sessionId: string) => void;
@@ -87,11 +83,17 @@ const CourseCalendarView: React.FC<CourseCalendarViewProps> = ({
     }
   };
 
+  // Convert tasks to ExtendedTask type
+  const extendedTasks: ExtendedTask[] = tasks.map(task => ({
+    ...task,
+    dueDate: task.dueDate
+  }));
+
   return (
     <>
       <AcademicCalendar 
         courses={courses} 
-        tasks={tasks} 
+        tasks={extendedTasks} 
         showFilters={true}
         onAddSession={handleOpenAddForm}
         onEditSession={handleOpenEditForm}

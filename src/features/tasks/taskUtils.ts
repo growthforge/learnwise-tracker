@@ -15,6 +15,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-1",
     title: "Complete ML Assignment 3",
+    courseId: "course-1",
     course: {
       id: "course-1",
       name: "Machine Learning",
@@ -29,6 +30,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-2",
     title: "Read Chapter 5",
+    courseId: "course-4",
     course: {
       id: "course-4",
       name: "Economics 101",
@@ -43,6 +45,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-3",
     title: "Prepare for Linear Algebra Quiz",
+    courseId: "course-3",
     course: {
       id: "course-3",
       name: "Linear Algebra",
@@ -57,6 +60,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-4",
     title: "Review lecture notes",
+    courseId: "course-2",
     course: {
       id: "course-2",
       name: "Data Structures",
@@ -71,6 +75,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-5",
     title: "Submit Psychology Essay",
+    courseId: "course-5",
     course: {
       id: "course-5",
       name: "Introduction to Psychology",
@@ -85,6 +90,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-6",
     title: "Algorithms Problem Set 2",
+    courseId: "course-6",
     course: {
       id: "course-6",
       name: "Algorithms",
@@ -99,6 +105,7 @@ export const sampleTasks: Task[] = [
   {
     id: "task-7",
     title: "Economics Quiz 1",
+    courseId: "course-4",
     course: {
       id: "course-4",
       name: "Economics 101",

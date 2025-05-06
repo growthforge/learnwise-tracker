@@ -25,8 +25,8 @@ export interface CalendarEvent {
   meta?: any;
 }
 
-export interface ExtendedTask extends Task {
-  dueDate?: string | Date;
+export interface ExtendedTask extends Omit<Task, 'dueDate'> {
+  dueDate?: Date | string;
 }
 
 // Update to match the service definition (title is required)

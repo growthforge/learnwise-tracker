@@ -20,7 +20,14 @@ export const useCourses = () => {
     try {
       if (!user) {
         // Use sample data if not authenticated
-        setCourses(sampleCourses);
+        // Convert the sample courses to the expected Course type
+        const compatibleCourses: Course[] = sampleCourses.map(course => ({
+          ...course,
+          // Convert the nextClass object to a Date if it exists
+          nextClass: course.nextClass ? new Date() : undefined, // Using current date as a placeholder
+        }));
+        setCourses(compatibleCourses);
+        setLoading(false);
         return;
       }
       
@@ -42,7 +49,7 @@ export const useCourses = () => {
           color: course.color || 'blue',
           professor: course.professor || '',
           progress: course.progress || 0,
-          nextClass: course.next_class ? new Date(course.next_class) : undefined,
+          nextClass: course.next_class ? new Date(course.next_class as string) : undefined,
           upcomingDeadlines: course.upcoming_deadlines || 0,
           totalHours: course.total_hours_spent || 0,
           totalHoursSpent: course.total_hours_spent || 0
@@ -101,7 +108,7 @@ export const useCourses = () => {
         color: data.color || 'blue',
         professor: data.professor || '',
         progress: data.progress || 0,
-        nextClass: data.next_class ? new Date(data.next_class) : undefined,
+        nextClass: data.next_class ? new Date(data.next_class as string) : undefined,
         upcomingDeadlines: data.upcoming_deadlines || 0,
         totalHours: data.total_hours_spent || 0,
         totalHoursSpent: data.total_hours_spent || 0

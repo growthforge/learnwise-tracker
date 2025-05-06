@@ -55,7 +55,14 @@ const Dashboard: React.FC = () => {
         
         if (!user) {
           // Use sample data if user is not authenticated
-          setCourses(sampleCourses);
+          // Convert sample courses to compatible format
+          const compatibleCourses: Course[] = sampleCourses.map(course => ({
+            ...course,
+            // Convert the nextClass object to a Date if it exists
+            nextClass: course.nextClass ? new Date() : undefined,
+          }));
+          
+          setCourses(compatibleCourses);
           setTasks(sampleTasks);
           
           setStudyStats({
@@ -104,7 +111,7 @@ const Dashboard: React.FC = () => {
             color: course.color,
             professor: course.professor || '',
             progress: course.progress || 0,
-            nextClass: course.next_class ? new Date(course.next_class) : undefined,
+            nextClass: course.next_class ? new Date(course.next_class as string) : undefined,
             upcomingDeadlines: course.upcoming_deadlines || 0,
             totalHours: course.total_hours_spent || 0,
             totalHoursSpent: course.total_hours_spent || 0
@@ -133,12 +140,17 @@ const Dashboard: React.FC = () => {
             description: task.description || '',
             completed: task.completed || false,
             courseId: task.course_id,
-            course: task.course_name || '',
+            course: {
+              id: task.course_id,
+              name: task.course_id, // We'll need to fetch real course data or use a default
+              code: task.course_id,
+              color: 'blue' // Default color
+            },
             dueText: task.due_text || '',
             dueDate: task.due_date ? new Date(task.due_date) : undefined,
             due: task.due_text || '',
-            priority: task.priority || 'medium',
-            estimatedTime: task.estimated_time || 0,
+            priority: (task.priority as "high" | "medium" | "low") || 'medium',
+            estimatedTime: task.estimated_time || 0
           }));
           setTasks(mappedTasks);
         } else {

@@ -1,9 +1,12 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ArrowUpRight, CalendarClock, CheckCircle2, Circle, Clock, Pencil, Trash } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export interface Task {
   id: string;
@@ -11,11 +14,16 @@ export interface Task {
   description?: string;
   completed: boolean;
   courseId: string;
-  course?: string; // Add this for backward compatibility
+  course: {
+    id: string;
+    name: string;
+    code: string;
+    color: string;
+  };
   dueText?: string;
   dueDate?: Date;
-  due?: string; // Add this for backward compatibility
-  priority: string;
+  due?: string;
+  priority: "high" | "medium" | "low";
   estimatedTime: number;
 }
 

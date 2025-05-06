@@ -28,6 +28,7 @@ export const useTasks = (initialFilter?: 'all' | 'completed' | 'pending') => {
           filteredTasks = sampleTasks.filter(task => !task.completed);
         }
         setTasks(filteredTasks);
+        setLoading(false);
         return;
       }
       
@@ -59,11 +60,17 @@ export const useTasks = (initialFilter?: 'all' | 'completed' | 'pending') => {
           description: task.description || '',
           completed: task.completed || false,
           courseId: task.course_id,
-          course: task.course_name || '',
+          // Construct a proper course object
+          course: {
+            id: task.course_id,
+            name: task.course_id, // We'll need to fetch real course data or use a default
+            code: task.course_id,
+            color: 'blue' // Default color
+          },
           dueText: task.due_text || '',
           dueDate: task.due_date ? new Date(task.due_date) : undefined,
           due: task.due_text || '',
-          priority: task.priority || 'medium',
+          priority: (task.priority as "high" | "medium" | "low") || 'medium',
           estimatedTime: task.estimated_time || 0
         }));
         setTasks(mappedTasks);
@@ -94,7 +101,6 @@ export const useTasks = (initialFilter?: 'all' | 'completed' | 'pending') => {
         description: task.description || '',
         completed: task.completed || false,
         course_id: task.courseId,
-        course_name: task.course || '',
         due_text: task.dueText || task.due || '',
         due_date: task.dueDate?.toISOString(),
         priority: task.priority || 'medium',
@@ -113,18 +119,23 @@ export const useTasks = (initialFilter?: 'all' | 'completed' | 'pending') => {
       
       toast.success('Task added successfully');
       
-      // Add the new task to the state
+      // Add the new task to the state with correct course object
       const mappedTask: Task = {
         id: data.id,
         title: data.title,
         description: data.description || '',
         completed: data.completed || false,
         courseId: data.course_id,
-        course: data.course_name || '',
+        course: {
+          id: data.course_id,
+          name: data.course_id, // We'll need proper course data
+          code: data.course_id,
+          color: 'blue' // Default color
+        },
         dueText: data.due_text || '',
         dueDate: data.due_date ? new Date(data.due_date) : undefined,
         due: data.due_text || '',
-        priority: data.priority || 'medium',
+        priority: (data.priority as "high" | "medium" | "low") || 'medium',
         estimatedTime: data.estimated_time || 0
       };
       
@@ -209,7 +220,6 @@ export const useTasks = (initialFilter?: 'all' | 'completed' | 'pending') => {
         due_text: updates.dueText || updates.due,
         due_date: updates.dueDate?.toISOString(),
         course_id: updates.courseId,
-        course_name: updates.course,
         estimated_time: updates.estimatedTime
       };
       

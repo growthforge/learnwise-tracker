@@ -2,17 +2,18 @@
 import React, { useState } from "react";
 import { sampleCourses } from "@/features/courses/coursesData";
 import AcademicCalendar from "@/features/calendar/AcademicCalendar";
-import { StudySession } from "@/features/calendar/types";
+import { StudySession, ExtendedTask } from "@/features/calendar/types";
 import { AIScheduleSuggestion } from "@/services/aiService";
 import { toast } from "sonner";
 import AIScheduleSuggestions from "@/features/ai/AIScheduleSuggestions";
 import { v4 as uuidv4 } from "uuid";
 
 // Sample tasks for the calendar view
-const sampleTasks = [
+const sampleTasks: ExtendedTask[] = [
   {
     id: "task-1",
     title: "Complete ML Assignment",
+    courseId: "course-1",
     course: {
       id: "course-1",
       name: "Machine Learning",
@@ -22,13 +23,14 @@ const sampleTasks = [
     due: "Tomorrow at 11:59 PM",
     dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
     completed: false,
-    priority: "high" as const,
+    priority: "high",
     estimatedTime: 3,
     description: "Implement and train a neural network model"
   },
   {
     id: "task-2",
     title: "Read Chapter 5",
+    courseId: "course-3",
     course: {
       id: "course-3",
       name: "Linear Algebra",
@@ -38,13 +40,14 @@ const sampleTasks = [
     due: "Friday at 8:00 AM",
     dueDate: new Date(new Date().setDate(new Date().getDate() + 3)),
     completed: false,
-    priority: "medium" as const,
+    priority: "medium",
     estimatedTime: 1.5,
     description: "Read about eigenvalues and eigenvectors"
   },
   {
     id: "task-3",
     title: "Submit Economics Quiz",
+    courseId: "course-4",
     course: {
       id: "course-4",
       name: "Economics 101",
@@ -54,7 +57,7 @@ const sampleTasks = [
     due: "Today at 5:00 PM",
     dueDate: new Date(),
     completed: true,
-    priority: "high" as const,
+    priority: "high",
     estimatedTime: 0.5
   }
 ];

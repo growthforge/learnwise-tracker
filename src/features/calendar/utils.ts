@@ -1,11 +1,7 @@
 
-import { CalendarEvent, StudySession } from "./types";
+import { CalendarEvent, StudySession, ExtendedTask } from "./types";
 import { Course } from "@/components/CourseCard";
 import { Task } from "@/components/TaskList";
-
-interface ExtendedTask extends Task {
-  dueDate?: string | Date;
-}
 
 // Generate calendar events from courses, tasks, and sessions
 export const generateEvents = (
@@ -23,25 +19,41 @@ export const generateEvents = (
         "Monday": 1, "Tuesday": 2, "Wednesday": 3, "Thursday": 4, "Friday": 5, "Saturday": 6, "Sunday": 0
       };
       
-      // Create a date for the next class
-      const dayOfWeek = dayMap[course.nextClass.day];
-      const currentDay = today.getDay();
-      const daysUntilClass = (dayOfWeek - currentDay + 7) % 7;
-      const nextClassDate = new Date(today);
-      nextClassDate.setDate(today.getDate() + daysUntilClass);
+      // Create a date for the next class - handling nextClass correctly
+      let nextClassDate: Date;
       
-      // Set the class time
-      if (course.nextClass.time) {
-        const [hours, minutes] = course.nextClass.time.split(':').length > 1 
-          ? course.nextClass.time.split(':')
-          : course.nextClass.time.includes('AM') || course.nextClass.time.includes('PM')
-            ? [course.nextClass.time.split(' ')[0], '00']
-            : ['09', '00'];
-            
-        const isPM = course.nextClass.time.includes('PM');
-        const hour = parseInt(hours) + (isPM && parseInt(hours) < 12 ? 12 : 0);
+      if (typeof course.nextClass === 'object' && course.nextClass instanceof Date) {
+        // If nextClass is already a Date object
+        nextClassDate = new Date(course.nextClass);
+      } else if (typeof course.nextClass === 'object' && 'day' in course.nextClass) {
+        // If nextClass is an object with 'day' property
+        // @ts-ignore - We know this is a valid object structure from coursesData
+        const dayOfWeek = dayMap[course.nextClass.day];
+        const currentDay = today.getDay();
+        const daysUntilClass = (dayOfWeek - currentDay + 7) % 7;
+        nextClassDate = new Date(today);
+        nextClassDate.setDate(today.getDate() + daysUntilClass);
         
-        nextClassDate.setHours(hour, parseInt(minutes) || 0);
+        // Set the class time
+        // @ts-ignore - We know this is a valid object structure from coursesData
+        if (course.nextClass.time) {
+          // @ts-ignore - We know this is a valid object structure from coursesData
+          const timeStr = course.nextClass.time;
+          const [hours, minutes] = timeStr.split(':').length > 1 
+            ? timeStr.split(':')
+            : timeStr.includes('AM') || timeStr.includes('PM')
+              ? [timeStr.split(' ')[0], '00']
+              : ['09', '00'];
+              
+          const isPM = timeStr.includes('PM');
+          const hour = parseInt(hours) + (isPM && parseInt(hours) < 12 ? 12 : 0);
+          
+          nextClassDate.setHours(hour, parseInt(minutes) || 0);
+        }
+      } else {
+        // Default fallback
+        nextClassDate = new Date();
+        nextClassDate.setDate(today.getDate() + 1);
       }
       
       // Add the class event
@@ -78,14 +90,14 @@ export const generateEvents = (
   // Add task events
   tasks.forEach(task => {
     if (task.dueDate || task.due) {
-      const dueDate = task.dueDate ? new Date(task.dueDate) : new Date(task.due);
+      const dueDate = task.dueDate ? new Date(task.dueDate) : new Date(task.due || '');
       
       events.push({
         id: `task-${task.id}`,
         title: task.title,
         date: dueDate,
         type: task.completed ? 'completed' : 'task',
-        courseId: task.course.id,
+        courseId: task.courseId,
         courseColor: task.course.color,
         description: task.description || `Priority: ${task.priority}`,
         duration: task.estimatedTime ? task.estimatedTime * 60 : 30 // Convert hours to minutes
