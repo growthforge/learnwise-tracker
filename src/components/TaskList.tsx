@@ -1,23 +1,22 @@
-
 import React from "react";
-import { CheckCircle2, Circle, Clock, CalendarClock, ArrowUpRight, Pencil, Trash } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar, Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 export interface Task {
   id: string;
   title: string;
-  course: {
-    id: string;
-    name: string;
-    code: string;
-    color: string;
-  };
-  due: string;
-  completed: boolean;
-  priority: "high" | "medium" | "low";
-  estimatedTime?: number;
   description?: string;
+  completed: boolean;
+  courseId: string;
+  course?: string; // Add this for backward compatibility
+  dueText?: string;
+  dueDate?: Date;
+  due?: string; // Add this for backward compatibility
+  priority: string;
+  estimatedTime: number;
 }
 
 interface TaskListProps {

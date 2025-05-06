@@ -1,271 +1,258 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookText } from 'lucide-react';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { GraduationCap, ArrowRight, Loader2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import MarketingLayout from '@/components/MarketingLayout';
 
-const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-const signupSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-type SignupFormValues = z.infer<typeof signupSchema>;
-
-const Auth: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>('login');
-  const { signIn, signUp } = useAuth();
+const Auth = () => {
   const navigate = useNavigate();
-  
-  const loginForm = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
-  
-  const signupForm = useForm<SignupFormValues>({
-    resolver: zodResolver(signupSchema),
-    defaultValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
-  });
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialMode = queryParams.get('mode') === 'signup' ? 'signup' : 'login';
 
-  const onLoginSubmit = async (data: LoginFormValues) => {
-    await signIn(data.email, data.password);
-  };
+  const [mode, setMode] = useState<'login' | 'signup' | 'forgot-password'>(initialMode);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
-  const onSignupSubmit = async (data: SignupFormValues) => {
-    await signUp(data.email, data.password, data.firstName, data.lastName);
-    setActiveTab('login');
+  const { signIn, signUp, resetPassword, user } = useAuth();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setIsLoading(true);
+
+    try {
+      if (mode === 'signup') {
+        if (password !== confirmPassword) {
+          setErrorMsg('Passwords do not match');
+          setIsLoading(false);
+          return;
+        }
+        
+        const { error } = await signUp(email, password, firstName, lastName);
+        if (error) {
+          throw error;
+        }
+        
+        toast.success('Account created successfully! Please log in.');
+        setMode('login');
+      } else if (mode === 'login') {
+        const { error } = await signIn(email, password);
+        if (error) {
+          throw error;
+        }
+        
+        toast.success('Logged in successfully!');
+        navigate('/dashboard');
+      } else if (mode === 'forgot-password') {
+        const { error } = await resetPassword(email);
+        if (error) {
+          throw error;
+        }
+        
+        toast.success('Password reset email sent. Please check your inbox.');
+        setMode('login');
+      }
+    } catch (error: any) {
+      console.error('Authentication error:', error);
+      setErrorMsg(error.message || 'An error occurred during authentication');
+      toast.error(error.message || 'Authentication failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-secondary/20 p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <div className="flex justify-center mb-3">
-            <div className="p-2 rounded-full bg-primary/10">
-              <BookText className="h-8 w-8 text-primary" />
+    <MarketingLayout>
+      <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] py-12 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <div className="flex justify-center mb-2">
+              <GraduationCap className="h-10 w-10 text-primary" />
             </div>
-          </div>
-          <h1 className="text-2xl font-bold">StudyFlow</h1>
-          <p className="text-muted-foreground">Your ultimate study companion</p>
-        </div>
-        
-        <Tabs defaultValue={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-2 mb-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Login to your account</CardTitle>
-                <CardDescription>
-                  Enter your email and password to access your dashboard
-                </CardDescription>
-              </CardHeader>
+            <CardTitle className="text-2xl">
+              {mode === 'login' ? 'Welcome back' : 
+               mode === 'signup' ? 'Create an account' : 
+               'Reset your password'}
+            </CardTitle>
+            <CardDescription>
+              {mode === 'login' ? 'Enter your credentials to access your account' : 
+               mode === 'signup' ? 'Enter your information to create your account' : 
+               'Enter your email to receive a password reset link'}
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleAuth}>
+            <CardContent className="space-y-4">
+              {errorMsg && (
+                <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                  {errorMsg}
+                </div>
+              )}
               
-              <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)}>
-                  <CardContent className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="name@example.com"
-                              type="email"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="••••••••"
-                              type="password"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                  
-                  <CardFooter className="flex flex-col">
-                    <Button 
-                      type="submit" 
-                      className="w-full mb-4"
-                      disabled={loginForm.formState.isSubmitting}
-                    >
-                      {loginForm.formState.isSubmitting ? "Logging in..." : "Login"}
-                    </Button>
-                    
-                    <Button 
-                      variant="ghost" 
-                      type="button" 
-                      className="text-sm text-muted-foreground hover:text-primary"
-                      onClick={() => navigate("/")}
-                    >
-                      Back to Home
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Form>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create an account</CardTitle>
-                <CardDescription>
-                  Join StudyFlow to track your academic progress
-                </CardDescription>
-              </CardHeader>
-              
-              <Form {...signupForm}>
-                <form onSubmit={signupForm.handleSubmit(onSignupSubmit)}>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={signupForm.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="First Name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={signupForm.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Last Name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+              {mode === 'signup' && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input 
+                        id="firstName" 
+                        type="text" 
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required 
                       />
                     </div>
-                    
-                    <FormField
-                      control={signupForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="name@example.com" type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={signupForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input placeholder="••••••••" type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={signupForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input placeholder="••••••••" type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </CardContent>
-                  
-                  <CardFooter className="flex flex-col">
-                    <Button 
-                      type="submit" 
-                      className="w-full mb-4"
-                      disabled={signupForm.formState.isSubmitting}
-                    >
-                      {signupForm.formState.isSubmitting ? "Creating account..." : "Create Account"}
-                    </Button>
-                    
-                    <Button 
-                      variant="ghost" 
-                      type="button" 
-                      className="text-sm text-muted-foreground hover:text-primary"
-                      onClick={() => navigate("/")}
-                    >
-                      Back to Home
-                    </Button>
-                  </CardFooter>
-                </form>
-              </Form>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input 
+                        id="lastName" 
+                        type="text" 
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required 
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required 
+                />
+              </div>
+              
+              {mode !== 'forgot-password' && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    {mode === 'login' && (
+                      <Button 
+                        type="button" 
+                        variant="link" 
+                        size="sm" 
+                        className="px-0"
+                        onClick={() => setMode('forgot-password')}
+                      >
+                        Forgot password?
+                      </Button>
+                    )}
+                  </div>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required 
+                  />
+                </div>
+              )}
+              
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Input 
+                    id="confirmPassword" 
+                    type="password" 
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required 
+                  />
+                </div>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {mode === 'login' ? 'Logging in...' : 
+                     mode === 'signup' ? 'Creating account...' : 
+                     'Sending reset link...'}
+                  </>
+                ) : (
+                  <>
+                    {mode === 'login' ? 'Log In' : 
+                     mode === 'signup' ? 'Sign Up' : 
+                     'Send Reset Link'}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </form>
+          <CardFooter className="flex flex-col gap-4 text-center text-sm text-muted-foreground">
+            {mode === 'login' ? (
+              <div>
+                Don't have an account?{' '}
+                <Button variant="link" className="p-0" onClick={() => setMode('signup')}>
+                  Sign up
+                </Button>
+              </div>
+            ) : mode === 'signup' ? (
+              <div>
+                Already have an account?{' '}
+                <Button variant="link" className="p-0" onClick={() => setMode('login')}>
+                  Log in
+                </Button>
+              </div>
+            ) : (
+              <div>
+                Remember your password?{' '}
+                <Button variant="link" className="p-0" onClick={() => setMode('login')}>
+                  Log in
+                </Button>
+              </div>
+            )}
+            
+            <div>
+              By continuing, you agree to our{' '}
+              <Link to="/terms" className="underline underline-offset-4 hover:text-primary">
+                Terms of Service
+              </Link>
+              {' '}and{' '}
+              <Link to="/privacy" className="underline underline-offset-4 hover:text-primary">
+                Privacy Policy
+              </Link>
+              .
+            </div>
+          </CardFooter>
+        </Card>
       </div>
-    </div>
+    </MarketingLayout>
   );
 };
 

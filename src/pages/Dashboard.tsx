@@ -82,6 +82,7 @@ const Dashboard: React.FC = () => {
               { day: "Sun", hours: 4.0 },
             ]
           });
+          setIsLoading(false);
           return;
         }
         
@@ -93,8 +94,10 @@ const Dashboard: React.FC = () => {
         if (coursesError) {
           console.error('Error fetching courses:', coursesError);
           toast.error('Failed to load courses');
-        } else {
-          setCourses(coursesData.map(course => ({
+          // Use sample data as fallback
+          setCourses(sampleCourses);
+        } else if (coursesData && coursesData.length > 0) {
+          const mappedCourses: Course[] = coursesData.map(course => ({
             id: course.id,
             name: course.name,
             code: course.code,
@@ -104,7 +107,12 @@ const Dashboard: React.FC = () => {
             nextClass: course.next_class ? new Date(course.next_class) : undefined,
             upcomingDeadlines: course.upcoming_deadlines || 0,
             totalHours: course.total_hours_spent || 0,
-          })));
+            totalHoursSpent: course.total_hours_spent || 0
+          }));
+          setCourses(mappedCourses);
+        } else {
+          // No courses found in database, use sample data
+          setCourses(sampleCourses);
         }
         
         // Fetch tasks from Supabase
@@ -116,18 +124,26 @@ const Dashboard: React.FC = () => {
         if (tasksError) {
           console.error('Error fetching tasks:', tasksError);
           toast.error('Failed to load tasks');
-        } else {
-          setTasks(tasksData.map(task => ({
+          // Use sample data as fallback
+          setTasks(sampleTasks);
+        } else if (tasksData && tasksData.length > 0) {
+          const mappedTasks: Task[] = tasksData.map(task => ({
             id: task.id,
             title: task.title,
             description: task.description || '',
             completed: task.completed || false,
             courseId: task.course_id,
+            course: task.course_name || '',
             dueText: task.due_text || '',
             dueDate: task.due_date ? new Date(task.due_date) : undefined,
+            due: task.due_text || '',
             priority: task.priority || 'medium',
             estimatedTime: task.estimated_time || 0,
-          })));
+          }));
+          setTasks(mappedTasks);
+        } else {
+          // No tasks found in database, use sample data
+          setTasks(sampleTasks);
         }
         
         // Fetch analytics data from Supabase
@@ -139,23 +155,77 @@ const Dashboard: React.FC = () => {
         if (analyticsError && analyticsError.code !== 'PGRST116') {
           console.error('Error fetching analytics:', analyticsError);
           toast.error('Failed to load analytics data');
+          
+          // Use sample stats as fallback
+          setStudyStats({
+            totalHours: 157.5,
+            weeklyHours: 24.5,
+            totalTasks: sampleTasks.length,
+            completedTasks: sampleTasks.filter(t => t.completed).length,
+            streak: 12,
+            courseDistribution: [
+              { id: "course-1", name: "Machine Learning", hours: 45, color: "blue" },
+              { id: "course-2", name: "Data Structures", hours: 32, color: "green" },
+              { id: "course-3", name: "Linear Algebra", hours: 28, color: "purple" },
+              { id: "course-4", name: "Economics 101", hours: 18, color: "amber" },
+              { id: "course-5", name: "Psychology", hours: 12, color: "red" },
+              { id: "course-6", name: "Algorithms", hours: 22.5, color: "sky" },
+            ],
+            weeklyData: [
+              { day: "Mon", hours: 3.5 },
+              { day: "Tue", hours: 2.0 },
+              { day: "Wed", hours: 4.5 },
+              { day: "Thu", hours: 3.0 },
+              { day: "Fri", hours: 5.5 },
+              { day: "Sat", hours: 2.0 },
+              { day: "Sun", hours: 4.0 },
+            ]
+          });
         } else if (analyticsData) {
+          // Create a safe parse function to handle potentially invalid JSON data
+          const safeParseJson = (jsonString: string | null, fallback: any) => {
+            if (!jsonString) return fallback;
+            try {
+              return JSON.parse(jsonString);
+            } catch (e) {
+              console.error('Error parsing JSON:', e);
+              return fallback;
+            }
+          };
+
+          // Initialize default values for the analytics data
+          const defaultDistribution = [
+            { id: "course-1", name: "Machine Learning", hours: 45, color: "blue" },
+            { id: "course-2", name: "Data Structures", hours: 32, color: "green" },
+          ];
+
+          const defaultWeeklyData = [
+            { day: "Mon", hours: 0 },
+            { day: "Tue", hours: 0 },
+            { day: "Wed", hours: 0 },
+            { day: "Thu", hours: 0 },
+            { day: "Fri", hours: 0 },
+            { day: "Sat", hours: 0 },
+            { day: "Sun", hours: 0 },
+          ];
+          
+          // Extract and safely parse the analytics data
+          const courseDistribution = Array.isArray(analyticsData.course_distribution) 
+            ? analyticsData.course_distribution 
+            : safeParseJson(analyticsData.course_distribution as string, defaultDistribution);
+          
+          const weeklyData = Array.isArray(analyticsData.weekly_data)
+            ? analyticsData.weekly_data
+            : safeParseJson(analyticsData.weekly_data as string, defaultWeeklyData);
+
           setStudyStats({
             totalHours: analyticsData.total_hours || 0,
             weeklyHours: analyticsData.weekly_hours || 0,
             totalTasks: analyticsData.total_tasks || 0,
             completedTasks: analyticsData.completed_tasks || 0,
             streak: analyticsData.streak || 0,
-            courseDistribution: analyticsData.course_distribution || [],
-            weeklyData: analyticsData.weekly_data || [
-              { day: "Mon", hours: 0 },
-              { day: "Tue", hours: 0 },
-              { day: "Wed", hours: 0 },
-              { day: "Thu", hours: 0 },
-              { day: "Fri", hours: 0 },
-              { day: "Sat", hours: 0 },
-              { day: "Sun", hours: 0 },
-            ]
+            courseDistribution: courseDistribution || defaultDistribution,
+            weeklyData: weeklyData || defaultWeeklyData
           });
         }
       } catch (error) {
@@ -164,6 +234,31 @@ const Dashboard: React.FC = () => {
         // Use sample data as fallback
         setCourses(sampleCourses);
         setTasks(sampleTasks);
+        
+        setStudyStats({
+          totalHours: 157.5,
+          weeklyHours: 24.5,
+          totalTasks: 45,
+          completedTasks: 38,
+          streak: 12,
+          courseDistribution: [
+            { id: "course-1", name: "Machine Learning", hours: 45, color: "blue" },
+            { id: "course-2", name: "Data Structures", hours: 32, color: "green" },
+            { id: "course-3", name: "Linear Algebra", hours: 28, color: "purple" },
+            { id: "course-4", name: "Economics 101", hours: 18, color: "amber" },
+            { id: "course-5", name: "Psychology", hours: 12, color: "red" },
+            { id: "course-6", name: "Algorithms", hours: 22.5, color: "sky" },
+          ],
+          weeklyData: [
+            { day: "Mon", hours: 3.5 },
+            { day: "Tue", hours: 2.0 },
+            { day: "Wed", hours: 4.5 },
+            { day: "Thu", hours: 3.0 },
+            { day: "Fri", hours: 5.5 },
+            { day: "Sat", hours: 2.0 },
+            { day: "Sun", hours: 4.0 },
+          ]
+        });
       } finally {
         setIsLoading(false);
       }
@@ -263,10 +358,13 @@ const Dashboard: React.FC = () => {
       toast.success('Study session completed!');
       
       // Update course total hours
+      const totalHours = course.totalHours || 0;
+      const newTotalHours = totalHours + (sessionData.duration / 3600); // Convert seconds to hours
+      
       await supabase
         .from('courses')
         .update({
-          total_hours_spent: (course.totalHours || 0) + (sessionData.duration / 3600) // Convert seconds to hours
+          total_hours_spent: newTotalHours
         })
         .eq('id', course.id);
       
@@ -296,11 +394,23 @@ const Dashboard: React.FC = () => {
       
       let weeklyData = analyticsData.weekly_data || [];
       
-      weeklyData = weeklyData.map((day: any) => 
-        day.day === dayOfWeek 
-          ? { ...day, hours: (day.hours || 0) + hours } 
-          : day
-      );
+      // If weekly_data is a string, parse it
+      if (typeof weeklyData === 'string') {
+        try {
+          weeklyData = JSON.parse(weeklyData);
+        } catch (e) {
+          console.error('Error parsing weekly data:', e);
+          weeklyData = studyStats.weeklyData; // Use current state as fallback
+        }
+      }
+      
+      if (Array.isArray(weeklyData)) {
+        weeklyData = weeklyData.map((day: any) => 
+          day.day === dayOfWeek 
+            ? { ...day, hours: (day.hours || 0) + hours } 
+            : day
+        );
+      }
       
       const { error: updateError } = await supabase
         .from('analytics')
